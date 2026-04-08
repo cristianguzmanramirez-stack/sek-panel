@@ -1,0 +1,3219 @@
+<!DOCTYPE html>
+<!-- saved from url=(0061)file:///C:/Users/crist/Downloads/sek_panel_supervisor_10.html -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowCore – Panel Supervisor</title>
+  <link href="file:///C:/Users/crist/Downloads/index_files/css2" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:    #1a2540;
+      --navy2:   #253360;
+      --gold:    #b8963e;
+      --gold-lt: #d4af6a;
+      --cream:   #f5f1eb;
+      --white:   #ffffff;
+      --gray:    #6b7280;
+      --light:   #e8e4dc;
+      --open:    #92400e;
+      --open-bg: #fef3c7;
+      --closed:  #065f46;
+      --closed-bg: #d1fae5;
+      --danger:  #c0392b;
+      --radius:  10px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #0f1624;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ══════════════════════════════
+       LOGIN
+    ══════════════════════════════ */
+    #login-screen {
+      width: 100%;
+      max-width: 400px;
+      padding: 16px;
+    }
+    .login-card {
+      background: var(--navy);
+      border-radius: 16px;
+      padding: 48px 40px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      border: 1px solid rgba(184,150,62,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .login-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .login-logo .shield {
+      font-size: 2.8rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .login-logo h1 {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--white);
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .login-logo p {
+      color: var(--gold-lt);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .login-field { margin-bottom: 18px; }
+    .login-field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .login-field input {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .login-field input:focus {
+      border-color: var(--gold);
+      background: rgba(255,255,255,0.1);
+    }
+    .login-field input::placeholder { color: rgba(255,255,255,0.25); }
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-login:hover  { background: var(--gold-lt); transform: translateY(-1px); }
+    .btn-login:active { transform: translateY(0); }
+    .login-error {
+      background: rgba(192,57,43,0.2);
+      border: 1px solid rgba(192,57,43,0.4);
+      color: #fca5a5;
+      font-size: 0.8rem;
+      padding: 10px 14px;
+      border-radius: 7px;
+      margin-top: 14px;
+      display: none;
+      text-align: center;
+    }
+
+    /* ══════════════════════════════
+       PANEL PRINCIPAL
+    ══════════════════════════════ */
+    #panel-screen {
+      display: none;
+      width: 100%;
+      min-height: 100vh;
+      background: #f0ece4;
+      flex-direction: column;
+    }
+
+    /* Topbar */
+    .topbar {
+      background: var(--navy);
+      padding: 0 32px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .topbar-left .dot {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+    .topbar-title {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--white);
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .topbar-sub {
+      color: rgba(255,255,255,0.4);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+    }
+    .btn-logout {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.6);
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+    /* Contenido */
+    .panel-body { padding: 28px 32px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+    /* Stats */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: 0 2px 8px rgba(26,37,64,0.08);
+      border-left: 4px solid var(--light);
+    }
+    .stat-card.open     { border-left-color: #f59e0b; }
+    .stat-card.closed   { border-left-color: #10b981; }
+    .stat-card.total    { border-left-color: var(--navy); }
+    .stat-card.interv   { border-left-color: #2563eb; }
+    .stat-card.critico  { border-left-color: #dc2626; }
+    .stat-card:hover    { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(26,37,64,0.12); transition: all 0.2s; }
+    .stat-card.active-filter { box-shadow: 0 0 0 2px var(--navy); }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--gray);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Filtros */
+    .filtros-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filtro-btn {
+      padding: 7px 18px;
+      border-radius: 999px;
+      border: 1.5px solid var(--light);
+      background: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--gray);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .filtro-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+    .filtro-btn:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
+    .search-input {
+      margin-left: auto;
+      padding: 7px 14px;
+      border: 1.5px solid var(--light);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      color: var(--navy);
+      background: var(--white);
+      outline: none;
+      width: 220px;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--gold); }
+
+    /* Tabla */
+    .tabla-wrap {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 12px rgba(26,37,64,0.08);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--navy); }
+    thead th {
+      padding: 12px 10px;
+      text-align: left;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      vertical-align: bottom;
+      line-height: 1.3;
+    }
+    tbody tr {
+      border-bottom: 1px solid #f3f0ea;
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: #faf7f2; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody td {
+      padding: 12px 10px;
+      font-size: 0.82rem;
+      color: var(--navy);
+      vertical-align: middle;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    thead th {
+      padding: 13px 10px;
+    }
+    .ticket-id {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: 0.04em;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .badge.abierto { background: var(--open-bg); color: var(--open); }
+    .badge.cerrado { background: var(--closed-bg); color: var(--closed); }
+    .btn-cerrar {
+      padding: 8px 14px;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+      width: 100%;
+    }
+    .btn-cerrar:hover { background: var(--navy2); }
+    .btn-cerrar:disabled {
+      background: #d1fae5;
+      color: #065f46;
+      cursor: not-allowed;
+      font-weight: 700;
+    }
+    /* Menú 3 puntitos */
+    .btn-menu-dots {
+      background: none;
+      border: 1px solid var(--light);
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--gray);
+      transition: all 0.2s;
+      width: 100%;
+      margin-top: 4px;
+    }
+    .btn-menu-dots:hover { background: var(--cream); border-color: var(--navy); }
+    .menu-dots-dropdown {
+      position: fixed;
+      background: var(--white);
+      border: 1px solid var(--light);
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(26,37,64,0.25);
+      z-index: 9999;
+      min-width: 180px;
+      overflow: hidden;
+    }
+    .menu-dots-item {
+      display: block; width: 100%;
+      padding: 10px 16px;
+      text-align: left;
+      background: none;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      color: var(--navy);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .menu-dots-item:hover { background: var(--cream); }
+    .accion-wrap { position: relative; }
+    .foto-link {
+      color: var(--gold);
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .foto-link:hover { text-decoration: underline; }
+    .no-rows {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--gray);
+      font-size: 0.88rem;
+    }
+
+    /* Modal confirmación */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,22,36,0.7);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999;
+      display: none;
+    }
+    .modal-box {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 36px 40px;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+    .modal-icon { font-size: 2.4rem; margin-bottom: 14px; }
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+    .modal-sub { font-size: 0.85rem; color: var(--gray); line-height: 1.5; margin-bottom: 6px; }
+    .modal-ticket { font-size: 0.8rem; color: var(--gold); font-weight: 700; margin-bottom: 24px; letter-spacing: 0.06em; }
+    .modal-btns { display: flex; gap: 12px; justify-content: center; }
+    .btn-modal-cancel {
+      padding: 10px 24px;
+      border: 1.5px solid var(--light);
+      background: transparent;
+      color: var(--gray);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-modal-cancel:hover { border-color: var(--navy); color: var(--navy); }
+    .btn-modal-confirm {
+      padding: 10px 24px;
+      background: var(--closed);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-modal-confirm:hover { background: #047857; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--navy); color: #fff;
+      padding: 12px 22px; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 500;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+      display: flex; align-items: center; gap: 8px;
+      transition: transform 0.3s ease; z-index: 9999;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { background: #065f46; }
+
+    @media (max-width: 640px) {
+      .panel-body { padding: 16px; }
+      .stats-row { grid-template-columns: 1fr; }
+      .search-input { width: 100%; margin-left: 0; }
+      .topbar { padding: 0 16px; }
+      thead th:nth-child(4), tbody td:nth-child(4),
+      thead th:nth-child(6), tbody td:nth-child(6) { display: none; }
+    }
+
+    /* ══ PASSWORD TOGGLE ══ */
+    .pass-wrap {
+      position: relative;
+    }
+    .pass-wrap input {
+      padding-right: 44px;
+    }
+    .toggle-pass {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(255,255,255,0.4);
+      font-size: 1.1rem;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .toggle-pass:hover { color: rgba(255,255,255,0.8); }
+    .toggle-pass-light {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray);
+      font-size: 1.1rem;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .toggle-pass-light:hover { color: var(--navy); }
+
+    /* ══ ADMIN SCREEN ══ */
+    #admin-screen {
+      display: none;
+      width: 100%;
+      min-height: 100vh;
+      background: #f0ece4;
+      flex-direction: column;
+    }
+    .admin-body { padding: 28px 32px; max-width: 700px; margin: 0 auto; width: 100%; }
+    .admin-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .admin-sub { font-size: 0.8rem; color: var(--gray); margin-bottom: 28px; }
+
+    .users-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 12px rgba(26,37,64,0.08);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .users-card-header {
+      background: var(--navy);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .users-card-header span {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .btn-add-user {
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-add-user:hover { background: var(--gold-lt); }
+
+    .user-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f3f0ea;
+      gap: 12px;
+    }
+    .user-row:last-child { border-bottom: none; }
+    .user-avatar {
+      width: 36px; height: 36px;
+      background: var(--navy);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .user-info { flex: 1; }
+    .user-name { font-size: 0.88rem; font-weight: 600; color: var(--navy); }
+    .user-role { font-size: 0.72rem; color: var(--gray); }
+    .badge-admin {
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.06em;
+    }
+    .badge-direccion {
+      background: #f3e8ff;
+      color: #6b21a8;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.06em;
+    }
+    .badge-administracion {
+      background: #dcfce7;
+      color: #166534;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.06em;
+    }
+    .badge-supervisor {
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.06em;
+    }
+    .btn-del-user {
+      background: none;
+      border: 1px solid #fecaca;
+      color: var(--danger);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-del-user:hover { background: #fef2f2; }
+
+    /* Formulario nuevo usuario */
+    .new-user-form {
+      padding: 20px;
+      background: #fafaf8;
+      border-top: 1px solid var(--light);
+      display: none;
+    }
+    .new-user-form.visible { display: block; }
+    .form-row { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .form-field { flex: 1; min-width: 160px; }
+    .form-field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .form-field input, .form-field select {
+      width: 100%;
+      border: 1.5px solid var(--light);
+      border-radius: 7px;
+      padding: 9px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      color: var(--navy);
+      background: var(--white);
+      outline: none;
+    }
+    .form-field input:focus { border-color: var(--gold); }
+    .btn-save-user {
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 9px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    .btn-cancel-user {
+      background: none;
+      border: 1px solid var(--light);
+      color: var(--gray);
+      border-radius: 7px;
+      padding: 9px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    /* Cambiar clave propia */
+    .change-pass-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 12px rgba(26,37,64,0.08);
+      overflow: hidden;
+    }
+    .change-pass-header {
+      background: var(--navy);
+      padding: 14px 20px;
+    }
+    .change-pass-header span {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .change-pass-body { padding: 20px; }
+    .pass-field-wrap { position: relative; margin-bottom: 14px; }
+    .pass-field-wrap input {
+      width: 100%;
+      border: 1.5px solid var(--light);
+      border-radius: 7px;
+      padding: 10px 42px 10px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      color: var(--navy);
+      background: var(--cream);
+      outline: none;
+    }
+    .pass-field-wrap input:focus { border-color: var(--gold); background: #fff; }
+    .pass-field-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .btn-save-pass {
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 10px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 480px) {
+      .admin-body { padding: 16px; }
+    }
+
+
+    /* ══ MODAL EDITAR USUARIO ══ */
+    .modal-edit-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,22,36,0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .modal-edit-overlay.visible { display: flex; }
+    .modal-edit-box {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 32px 36px;
+      max-width: 440px;
+      width: 92%;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+    .modal-edit-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-edit-title button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: var(--gray);
+    }
+    .edit-field { margin-bottom: 14px; }
+    .edit-field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .edit-field input, .edit-field select {
+      width: 100%;
+      border: 1.5px solid var(--light);
+      border-radius: 7px;
+      padding: 9px 40px 9px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      color: var(--navy);
+      background: var(--cream);
+      outline: none;
+    }
+    .edit-field input:focus { border-color: var(--gold); background: #fff; }
+    .edit-field-wrap { position: relative; }
+    .modal-edit-btns { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-edit-save {
+      flex: 1;
+      padding: 10px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-edit-save:hover { background: var(--navy2); }
+    .btn-edit-cancel {
+      padding: 10px 20px;
+      background: none;
+      border: 1.5px solid var(--light);
+      color: var(--gray);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+    .btn-edit-user {
+      background: none;
+      border: 1px solid var(--light);
+      color: var(--navy);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 6px;
+    }
+    .btn-edit-user:hover { background: #f0ece4; border-color: var(--navy); }
+
+
+    /* ══ RESPONSIVE MÓVIL ══ */
+    @media (max-width: 768px) {
+      .panel-body { padding: 12px; }
+      .topbar { padding: 0 12px; height: auto; min-height: 56px; flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+      .topbar-left img { height: 28px; }
+      .topbar-title { font-size: 0.9rem; }
+      .topbar-sub { font-size: 0.62rem; }
+      .stats-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .stat-card { padding: 14px 16px; }
+      .stat-num { font-size: 1.8rem; }
+      .filtros-bar { gap: 8px; }
+      .search-input { width: 100%; margin-left: 0; }
+      .filtro-btn { font-size: 0.75rem; padding: 6px 12px; }
+
+      /* Mostrar tarjetas en móvil */
+      .tickets-mobile { display: block !important; }
+      .tabla-wrap { display: none !important; }
+    }
+
+    @media (min-width: 769px) {
+      .tickets-mobile { display: none !important; }
+    }
+
+    /* Tarjetas móvil — ocultas por defecto, visibles en móvil via media query */
+    .tickets-mobile { display: none; }
+    .ticket-card {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(26,37,64,0.08);
+      border-left: 4px solid var(--light);
+    }
+    .ticket-card.abierto { border-left-color: #f59e0b; }
+    .ticket-card.cerrado { border-left-color: #10b981; }
+    .ticket-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .ticket-card-id {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: 0.03em;
+    }
+    .ticket-card-body {
+      font-size: 0.82rem;
+      color: var(--navy);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .ticket-card-field label {
+      display: block;
+      font-size: 0.65rem;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 2px;
+    }
+    .ticket-card-field span {
+      font-size: 0.82rem;
+      color: var(--navy);
+      font-weight: 500;
+    }
+    .ticket-card-desc {
+      font-size: 0.8rem;
+      color: var(--gray);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .ticket-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+
+    /* ══ ESTADO ASIGNADO E INTERVENIDO ══ */
+    .badge.asignado   { background: #dbeafe; color: #1e40af; }
+    .badge.intervenido { background: #2563eb; color: #ffffff; }
+
+    /* ══ MODAL ASIGNAR ENCARGADO ══ */
+    .modal-asignar-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,22,36,0.75);
+      display: none; align-items: center; justify-content: center;
+      z-index: 9998;
+    }
+    .modal-asignar-overlay.visible { display: flex; }
+    .modal-asignar-box {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 32px 36px;
+      max-width: 440px; width: 92%;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+    .modal-asignar-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; font-weight: 700;
+      color: var(--navy); margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-asignar-title button {{ background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--gray); }}
+    .asignar-field {{ margin-bottom: 14px; }}
+    .asignar-field label {{
+      display: block; font-size: 0.72rem; font-weight: 600;
+      color: var(--navy); letter-spacing: 0.06em;
+      text-transform: uppercase; margin-bottom: 6px;
+    }}
+    .asignar-field input, .asignar-field select {{
+      width: 100%; border: 1.5px solid var(--light);
+      border-radius: 7px; padding: 9px 12px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+      color: var(--navy); background: var(--cream); outline: none;
+    }}
+    .asignar-field input:focus {{ border-color: var(--gold); background: #fff; }}
+    .modal-asignar-btns {{ display: flex; gap: 10px; margin-top: 20px; }}
+    .btn-asignar-save {{
+      flex: 1; padding: 10px;
+      background: var(--navy); color: #fff;
+      border: none; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem; font-weight: 600; cursor: pointer;
+    }}
+    .btn-asignar-cancel {{
+      padding: 10px 20px; background: none;
+      border: 1.5px solid var(--light); color: var(--gray);
+      border-radius: 8px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem; cursor: pointer;
+    }}
+    .btn-asignar {{
+      padding: 6px 12px; background: #dbeafe;
+      color: #1e40af; border: 1px solid #bfdbfe;
+      border-radius: 6px; font-size: 0.75rem;
+      font-weight: 600; cursor: pointer;
+      transition: all 0.2s; white-space: nowrap;
+    }}
+    .btn-asignar:hover {{ background: #bfdbfe; }}
+
+
+    .badge.critico { background: #dc2626; color: #ffffff; }
+    .btn-critico {
+      padding: 6px 12px;
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-critico:hover { background: #dc2626; color: #fff; }
+    .btn-critico:disabled { background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; cursor: not-allowed; }
+
+
+    /* ══ ESTADÍSTICAS ══ */
+    #stats-screen {
+      display: none;
+      width: 100%;
+      min-height: 100vh;
+      background: #f0ece4;
+      flex-direction: column;
+    }
+    .stats-body { padding: 24px 32px; max-width: 1100px; margin: 0 auto; width: 100%; }
+    .stats-section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .stats-section-sub { font-size: 0.8rem; color: var(--gray); margin-bottom: 24px; }
+
+    /* Filtro periodo */
+    .periodo-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .periodo-btn {
+      padding: 7px 18px;
+      border-radius: 999px;
+      border: 1.5px solid var(--light);
+      background: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--gray);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .periodo-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+    /* KPI cards */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px rgba(26,37,64,0.08);
+      border-top: 3px solid var(--light);
+      text-align: center;
+    }
+    .kpi-card.k-total  { border-top-color: var(--navy); }
+    .kpi-card.k-open   { border-top-color: #f59e0b; }
+    .kpi-card.k-closed { border-top-color: #10b981; }
+    .kpi-card.k-time   { border-top-color: #8b5cf6; }
+    .kpi-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1;
+    }
+    .kpi-label { font-size: 0.72rem; color: var(--gray); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+    .kpi-sub   { font-size: 0.7rem; color: var(--gold); font-weight: 600; margin-top: 2px; }
+
+    /* Charts */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .chart-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(26,37,64,0.08);
+    }
+    .chart-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    canvas { max-width: 100%; }
+
+    /* Tabla resumen */
+    .resumen-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(26,37,64,0.08);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .resumen-header {
+      background: var(--navy);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .resumen-header span {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .btn-export {
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .resumen-table { width: 100%; border-collapse: collapse; }
+    .resumen-table th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 0.7rem;
+      color: var(--gray);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--light);
+    }
+    .resumen-table td {
+      padding: 12px 16px;
+      font-size: 0.82rem;
+      color: var(--navy);
+      border-bottom: 1px solid #f5f1eb;
+    }
+    .resumen-table tr:last-child td { border-bottom: none; }
+
+    @media (max-width: 768px) {
+      .stats-body { padding: 16px; }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .charts-row { grid-template-columns: 1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAB4AHgDASIAAhEBAxEB/8QAHAABAAIDAQEBAAAAAAAAAAAAAAYHBAUIAQMC/8QANhAAAQMEAQIDBQYFBQAAAAAAAQIDBAAFBhEHEiETMUEUFSJRkQgjMkJSgWJxgqHBFhckYaL/xAAaAQEAAgMBAAAAAAAAAAAAAAAAAgQBAwYF/8QAMREAAgIBAgUBBgQHAAAAAAAAAAECEQMEMQUSIUFhURMUgZGx8CIjceEyUmKCocHR/9oADAMBAAIRAxEAPwDsqlKUApSlAKUpQClKUApSlAKUpQClKUApSlAKUpQClKUApSq25Uz5VofNjtDmpxA8d1Pctb8kp/iP9tj18rOk0mTV5Fjxrr9ChxLiWDh2nefM+i+bfoibXe/Wi0npnz2WVnyb3tZ/pHetP/uBjfX0+PI0PNXgK1UBt+IojQU3nNrx7raeUClkq2+4T6HeyVH9IBNTfHLTFlWxmXjlylwLe42UhlUVBK1hRBWrrBJJ/wAftV/LpdJhX8Tl52j86ZzWLiXHNXO4Qjji+qi/xTr1acoUvk/DJDaL5absN2+ey+fMoB0of0nvWxqvMjx4x0+1XBhsIR8QuttaLTzH8TjQOlJ+ZSdj5VscNyKWLl/py/OtrneGHYcpB2iazrYUk+p1/n5VWyaNODyYXaXb7/zs16Uepo+L5o5Vp9bDlk9mtr7Jp3TfZpyi9k76EypSlUDoBSlKAUpSgFKUoBSlKAwb/cW7RY510d0W4kdbyh8+lJOv7VQXD62Lner5nF/WXY1maVLcJG+p5QUrevUgA6HzKaujkwwE8f31y6NzHILcJxchMMgPFtI2rp6u29D1qoLZBtdr43zWLZDLctzrNuvDJkKCnVRHUoWvZA0QOh0dvlXQ8LyQho8sVfNJpX4tJ/U5vi+lebWYckusYJuv6qbX0PxnGU5JHyS12GwxWpfIl+ZD6lugLbssVWyltAPZJCQSpRHfRJ3tIEht/EOTKsM1F25Hukm9S+haJo8T/iqSdkN/eDsfI9h/IViYEqyq+01lk6dJdbv8llTEaK7opEZCGClxCtaPWAVAAkgA7q76pajU5MPKoKrSe3/eyLuHRYc6lz26fq11XfpXV72U7jt6ybFL0m3ZUl2UiAwk3G5KmlYfZWoIbkJbV+VChpetEdRJ36/HJEqMWZ7oYlR123d4s3islC0oS4EyGkjz6NlKwPkrXpUnz16BcMiTEbfZdEay3L3j0KB8NpSEAJXryJUNgH9JqBcyZRd8cxnArtCmri3ZdtcDrmgpRSWWisEKB/MB+4r09JJ5MuOUYpSl27dLfnen/a6SPC1mnjixZYyk3GL/AFfXl2fTa0/Mo23ZeNjnoulmh3JtJSmUwh0JI7p6gDr9qzai/FNxuV345sV0u7xemyoaHnXCkJKirZB0AB5aqUVzmaPJklFdmzr8EnPFGT7pClKVrNopSlAKUpQClKUBj3GIxPt8iDKR1sSGlNOp/UlQII+hNUNwrbmY2UP8fZLMeZvWMx3obbR14d5tTpKmirf4ko6iCB5bH/ddA1BOWOOYuatQ7lBuD1jye1qLlru8YfeMK9UKH52z6pPzPzO7OnzuCcLpM0ZsKyNOroqnlPAnoggGZdpVkuFm03YsrQhS2lMA7RHmlHxNrRvSXfwkefclNYbWZc+twRG9+8dPMAdIvBuUfpI/V+MD/wAftWVNyPPMOucuVntryi3yXOlK75jzSbja5ASAkKcjKT1NdhvsQdk60O1R3J+YcRttrcudiuuEXu8BaehlWIPx5aiToklSukEefn6V60PzUk6l8P2pfOvCPMmpY22k1+j/AHt9PHxZPcStypthWy5cI5ti4yW7/fGmvZ4SmUrUtbTClAKeUskhTquwSTokmqx5GvknmDlqDYcdQoRV6iRD06DUcHbj6h6A9zr5BI861PtPN/NElqOzbbj7tKgQ9La9jgtfxdOvjI/qNdKcH8T2rjW1OL8c3K+zEj264LToq9fDQPyoB/cnufQCxk1cNJeRyUsnatlfft1+C/2VMeglqKx8vLjW97utl3pfFk/tcJi3W2Nb4qeiPGZQy0n5JSAAPoKyaUrmW7ds6RJJUhSlKwZFKUoBSlKAV59fpVX/AGq5s23cBZPMt8yRDlNtseG9HdU24jchsHSkkEdiRVTZU2uz8HZ5d7VbOTsemtW6MlD+QXNxYV1Po2WdOqIUNdz27K16mt0MPNFO+9EHOnR1VXlVJ9oTJr3jnDMR+y3By3zbjJg28zx+OMh4gLcBPkrWxv03vzqM5NYH+K8+wFWP5NkcyNkF2903WFc7m5KRJQtB++AWfgWk99p15j98RxWt/tByo6B+tfIxYxd8Yx2fE/X4Y39dVx3fMkzdnBnuMbTe568lxy/3OS/IVJWX3IMNsyW+pW+ohZcQkbPfQFSLL+Sr5OtGf8m4zc32okW3Wuy2tQWVMMOyOh2Q90H4etHjJT1a2CK2e7S9SPtUdT/WlUzd8STxZx9fs3s+RZPeL1Csj7hcuF1dkMyHegEOqaUSjsRsaA0NioDlVlueF8GWvl2251k0rKEswZ8lcm5rdjTfHUjrZLJPR0aWQAB21UY4lLZ+CTnW6OpPrSuQ+TMgtsblDkqRkdz5AjiGiB7pNklvoYiPORQQlzpUG0ErKNdXY/FWXlrmYu5Tx1Z8yYzG6XFzFHHblBx64FiQt9LgAcUUrSkkAgKO/M+tS92fTr91ZH2p1lSovxZCbgYLbmGod+hJKVr9nvckvzGypaiQ4sqVs/LudDVSiq7VOjahSlKwBSlKA0HIOJ2vOMPn4telSUwJwQHjHc6HPhWlY0dHXdI9K8zjEbTmGFzcSuxkJt01pDTpYcCHOlKkqGlaOu6R6VIKVJSaqjFIreHw5jwtNys95veU5HbLhGEZ2HeLsuQ02AoKStsaHQsFI0odxXuH8Q4vZMgg5E5dchyGZb2lN21y8XNUtENKho+EDoA67bOzVj1AomE3WDDaiRb66lsym+sNKW2AxpYd7FSvjWFAfD0gFKSACDvdCXMnzSo05Lg1yxszIfH2Kw+RrvnKGVG83eGiFKC3AWy2AB2RrsVBCQTvv0/zrExTjDB8e46mYJGh+12GWXXJTUp7rLniHuSoa1rpABGtdI77FfTLuPmsjvL85+5ux23XoDvSykpcQqKp5SSlYPZXU6CDrsUeu6jcrhSNOsyYdwyKU7ITZk2xTzTXhJf0486VOoB0pJW6hfQNaLet6URUVK11l6E2n2RtcQ4xxzHJTzCMlyS6w24bkX3VdLwqTFZYWAFDwj6a7bVvQJrWWjgzA2XbcsXK/wBxssOQJFvs0m8LetzSwSUlDfqB3IBJFbKVxm6/Lylw3SL4d8kJkJCohUUKS40vw3AV6cbPh9Kk9upKiN1+F8a3V5uwrXlKGX7HJdmRUx7ehDQdce6yOnfZAb20NEKKVrJJ3qs87/mFeDbzOM8WmSsxfmMyJIy9ppq6NOO7RptsoQWxr4SAd779wDWluvC9guCrE8cjy2JMsduNtizIl08J9TG96WsJ2o9gN9uwG6s2va1rJJdyXKjUYjY0Y5YWLS3c7rc0tFZ9puUoyJC+pRV8Sz3Ot6HyAArb0pUW76kthSlKwBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKA//9k=" alt="FlowCore" style="height:80px;object-fit:contain;margin-bottom:12px;border-radius:6px;background:#fff;padding:6px 10px;">
+      <h1>INMEGA FlowCore</h1>
+      <p>Prov 16:3</p>
+    </div>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="login-user" placeholder="supervisor" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <div class="pass-wrap">
+        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+        <button type="button" class="toggle-pass" onclick="toggleVer(&#39;login-pass&#39;, this)" tabindex="-1">👁</button>
+      </div>
+    </div>
+    <button class="btn-login" onclick="intentarLogin()">Ingresar al Panel</button>
+    <div class="login-error" id="login-error">Usuario o contraseña incorrectos.</div>
+  </div>
+</div>
+
+<!-- ══ PANEL ══ -->
+<div id="panel-screen">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <img src="data:image/jpeg;base64,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" alt="FlowCore" style="height:36px;object-fit:contain;background:#fff;border-radius:4px;padding:3px 6px;flex-shrink:0;">
+      <div>
+        <div class="topbar-title">INMEGA FlowCore</div>
+        <div class="topbar-sub" id="topbar-rol">INMEGA FlowCore</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.1);border-radius:20px;padding:4px 12px;margin-left:8px;">
+        <span style="font-size:0.72rem;color:rgba(255,255,255,0.5);">👤 </span>
+        <span style="font-size:0.75rem;color:var(--white);font-weight:600;" id="topbar-username">—</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn-logout" id="btn-stats-panel" onclick="mostrarStats()" style="display:none;">📊 Estadísticas</button>
+      <button class="btn-logout" id="btn-admin-panel" onclick="mostrarAdmin()" style="display:none;">⚙ Usuarios</button>
+      <button class="btn-logout" id="btn-encargados-panel" onclick="mostrarEncargados()" style="display:none;">👷 Encargados</button>
+      <button class="btn-logout" id="btn-volver-panel" onclick="volverPanel()" style="display:none;">← Volver</button>
+      <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="panel-body">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card total" onclick="filtrarDesdeCard(&#39;todos&#39;)" style="cursor:pointer;">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-label">Total reportes</div>
+      </div>
+      <div class="stat-card open" onclick="filtrarDesdeCard(&#39;Abierto&#39;)" style="cursor:pointer;">
+        <div class="stat-num" id="stat-abiertos">0</div>
+        <div class="stat-label">Abiertos</div>
+      </div>
+      <div class="stat-card interv" onclick="filtrarDesdeCard(&#39;Intervenido&#39;)" style="cursor:pointer;">
+        <div class="stat-num" id="stat-intervenidos">0</div>
+        <div class="stat-label">Intervenidos</div>
+      </div>
+      <div class="stat-card critico" onclick="filtrarDesdeCard(&#39;Crítico&#39;)" style="cursor:pointer;">
+        <div class="stat-num" id="stat-criticos">0</div>
+        <div class="stat-label">Críticos</div>
+      </div>
+      <div class="stat-card closed" onclick="filtrarDesdeCard(&#39;Cerrado&#39;)" style="cursor:pointer;">
+        <div class="stat-num" id="stat-cerrados">0</div>
+        <div class="stat-label">Cerrados</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-bar">
+      <button class="filtro-btn active" id="fbtn-todos" onclick="filtrar(&#39;todos&#39;, this)">Todos</button>
+      <button class="filtro-btn" id="fbtn-Abierto" onclick="filtrar(&#39;Abierto&#39;, this)">⚠️ Abiertos</button>
+      <button class="filtro-btn" id="fbtn-Intervenido" onclick="filtrar(&#39;Intervenido&#39;, this)">🔧 Intervenidos</button>
+      <button class="filtro-btn" id="fbtn-Crítico" onclick="filtrar(&#39;Crítico&#39;, this)">🚨 Críticos</button>
+      <button class="filtro-btn" id="fbtn-Cerrado" onclick="filtrar(&#39;Cerrado&#39;, this)">✅ Cerrados</button>
+      <input class="search-input" type="text" placeholder="🔍 Buscar ticket, nombre, área..." oninput="buscar(this.value)">
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-wrap">
+      <table style="width:100%;table-layout:fixed;">
+        <thead>
+          <tr>
+            <th style="width:9%;white-space:normal;">Ticket</th>
+            <th style="width:7%;white-space:normal;">Fecha</th>
+            <th style="width:9%;white-space:normal;">Reportado Por</th>
+            <th style="width:8%;white-space:normal;">Ubicación</th>
+            <th style="width:9%;white-space:normal;">Descripción</th>
+            <th style="width:5%;white-space:normal;">Foto</th>
+            <th style="width:8%;white-space:normal;">Estado</th>
+            <th style="width:8%;white-space:normal;">Encargado</th>
+            <th style="width:10%;white-space:normal;">Comentario</th>
+            <th style="width:7%;white-space:normal;">Fotos Rep.</th>
+            <th style="width:8%;white-space:normal;">Fecha Cierre</th>
+            <th style="width:12%;white-space:normal;">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Tarjetas móvil -->
+    <div class="tickets-mobile" id="tickets-mobile"></div>
+
+  </div>
+</div>
+
+<!-- Modal confirmación -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-icon">✅</div>
+    <div class="modal-title">Cerrar ticket</div>
+    <div class="modal-sub">¿Confirmas que esta anomalía fue resuelta?</div>
+    <div class="modal-ticket" id="modal-ticket-id"></div>
+    <div class="modal-btns">
+      <button class="btn-modal-cancel" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-modal-confirm" onclick="confirmarCierre()">Sí, marcar como cerrado</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toast-msg">Mensaje</span>
+</div>
+
+<script>
+  // ══════════════════════════════════════════════════════
+  // CONFIGURACIÓN — edita aquí
+  // ══════════════════════════════════════════════════════
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4IOQKBBSzIsl5SRBiwtdPmOy48M_8eSMxSe2eAsm2zSAqWRrh0jENf4vOj3YfNYYiug/exec";
+
+  // ── Sistema de usuarios ──
+  // ADMIN: solo puede crear/eliminar usuarios
+  // SUPERVISOR: puede ver tickets, cerrarlos y cambiar su clave
+  const ADMIN = { usuario: "admin", contrasena: "INMEGA2026*" };
+
+  // Usuarios almacenados en Google Sheets
+  let usuariosCache = [];
+
+  async function cargarUsuarios() {
+    try {
+      const res  = await fetch(`${APPS_SCRIPT_URL}?action=getUsuarios`);
+      const data = await res.json();
+      usuariosCache = data.usuarios || [];
+    } catch(e) {
+      usuariosCache = [];
+    }
+  }
+  function getUsuarios() { return usuariosCache; }
+
+  let usuarioActual = null; // guarda el usuario logueado
+
+  // ══════════════════════════════════════════════════════
+  // ESTADO
+  // ══════════════════════════════════════════════════════
+  let tickets       = [];
+  let ticketsFiltro = [];
+  let filtrActual   = "todos";
+  let busquedaActual = "";
+  let ticketParaCerrar = null;
+
+  // ══════════════════════════════════════════════════════
+  // LOGIN
+  // ══════════════════════════════════════════════════════
+  document.getElementById('login-pass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') intentarLogin();
+  });
+
+  async function intentarLogin() {
+    const u   = document.getElementById('login-user').value.trim();
+    const p   = document.getElementById('login-pass').value;
+    const err = document.getElementById('login-error');
+    const btn = document.querySelector('.btn-login');
+
+    // Verificar admin primero (sin necesidad de Sheets)
+    if (u === ADMIN.usuario && p === ADMIN.contrasena) {
+      usuarioActual = { ...ADMIN, rol: 'admin' };
+      sessionStorage.setItem('sek_sesion', JSON.stringify(usuarioActual));
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('panel-screen').style.display = 'flex';
+      document.getElementById('btn-stats-panel').style.display = 'block';
+      document.getElementById('btn-admin-panel').style.display = 'block';
+      document.getElementById('btn-encargados-panel').style.display = 'block';
+      document.getElementById('topbar-username').textContent = 'Administrador';
+      document.getElementById('topbar-rol').textContent = 'ADMINISTRADOR — FLOWCORE';
+      cargarUsuarios();
+      cargarEncargados();
+      cargarTickets();
+      return;
+    }
+
+    // Para otros usuarios, cargar desde Sheets
+    btn.textContent = 'Verificando...';
+    btn.disabled = true;
+    await cargarUsuarios();
+    btn.textContent = 'Ingresar al Panel';
+    btn.disabled = false;
+
+    const usuarios = getUsuarios();
+    const match = usuarios.find(x => x.usuario === u && String(x.contrasena) === String(p));
+    if (match) {
+      usuarioActual = match;
+      sessionStorage.setItem('sek_sesion', JSON.stringify(usuarioActual));
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('panel-screen').style.display = 'flex';
+      document.getElementById('topbar-rol').textContent = getRolLabel(match.rol).toUpperCase() + ' — FLOWCORE';
+      document.getElementById('topbar-username').textContent = match.nombre;
+      if (match.rol === 'admin') {
+        document.getElementById('btn-stats-panel').style.display  = 'block';
+        document.getElementById('btn-admin-panel').style.display  = 'block';
+        document.getElementById('btn-encargados-panel').style.display = 'block';
+      } else if (match.rol === 'supervisor') {
+        document.getElementById('btn-stats-panel').style.display  = 'block';
+        document.getElementById('btn-encargados-panel').style.display = 'block';
+      }
+      cargarEncargados();
+      cargarTickets();
+      return;
+    }
+
+    err.style.display = 'block';
+    document.getElementById('login-pass').value = '';
+    setTimeout(() => err.style.display = 'none', 3000);
+  }
+
+  function cerrarSesion() {
+    usuarioActual = null;
+    sessionStorage.removeItem('sek_sesion');
+    sessionStorage.removeItem('sek_pantalla');
+    document.getElementById('panel-screen').style.display  = 'none';
+    document.getElementById('admin-screen').style.display  = 'none';
+    document.getElementById('login-screen').style.display  = 'flex';
+    document.getElementById('btn-stats-panel').style.display = 'none';
+    document.getElementById('btn-admin-panel').style.display = 'none';
+    document.getElementById('btn-encargados-panel').style.display = 'none';
+    document.getElementById('btn-volver-panel').style.display = 'none';
+    document.getElementById('encargados-screen').style.display = 'none';
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+  }
+
+  // ── Admin: mostrar/ocultar pantalla de gestión ──
+  async function mostrarEncargados() {
+    sessionStorage.setItem('sek_pantalla', 'encargados');
+    document.getElementById('panel-screen').style.display = 'none';
+    document.getElementById('stats-screen').style.display = 'none';
+    document.getElementById('encargados-screen').style.display = 'flex';
+    await cargarEncargados();
+    renderEncargados();
+  }
+
+  function volverDesdeEncargados() {
+    document.getElementById('encargados-screen').style.display = 'none';
+    document.getElementById('panel-screen').style.display = 'flex';
+  }
+
+  async function mostrarAdmin() {
+    sessionStorage.setItem('sek_pantalla', 'admin');
+    document.getElementById('panel-screen').style.display = 'none';
+    document.getElementById('stats-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'flex';
+    await cargarUsuarios();
+    await cargarEncargados();
+    renderUsuarios();
+    renderEncargados();
+    // Cambiar pass: mostrar sección solo para admin
+    document.getElementById('cp-actual').placeholder = 'Tu contraseña de admin';
+  }
+
+  function volverPanel() {
+    sessionStorage.setItem('sek_pantalla', 'panel');
+    document.getElementById('admin-screen').style.display      = 'none';
+    document.getElementById('encargados-screen').style.display = 'none';
+    document.getElementById('stats-screen').style.display      = 'none';
+    document.getElementById('panel-screen').style.display      = 'flex';
+  }
+
+  // ── Render lista de usuarios ──
+  function renderUsuarios() {
+    const usuarios = getUsuarios();
+    const lista = document.getElementById('lista-usuarios');
+    if (usuarios.length === 0) {
+      lista.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gray);font-size:0.85rem;">No hay supervisores registrados.</div>';
+      return;
+    }
+    lista.innerHTML = usuarios.map((u, i) => `
+      <div class="user-row">
+        <div class="user-avatar">${u.nombre.charAt(0).toUpperCase()}</div>
+        <div class="user-info">
+          <div class="user-name">${u.nombre}</div>
+          <div class="user-role">@${u.usuario}</div>
+        </div>
+        <span class="badge-${getRolBadge(u.rol)}">${getRolLabel(u.rol)}</span>
+        <button class="btn-edit-user" onclick="abrirModalEdit(${i})">✏️ Editar</button>
+        <button class="btn-del-user" onclick="eliminarUsuario(${i})">Eliminar</button>
+      </div>
+    `).join('');
+  }
+
+  // ── Agregar usuario ──
+  function toggleFormNuevoUsuario() {
+    const f = document.getElementById('form-nuevo-usuario');
+    f.classList.toggle('visible');
+  }
+
+  async function guardarNuevoUsuario() {
+    const nombre  = document.getElementById('nu-nombre').value.trim();
+    const usuario = document.getElementById('nu-usuario').value.trim();
+    const pass    = document.getElementById('nu-pass').value;
+    const rol     = document.getElementById('nu-rol').value || 'supervisor';
+
+    if (!nombre || !usuario || !pass) { showToast('Completa todos los campos', 'error'); return; }
+    if (pass.length < 6) { showToast('La contraseña debe tener al menos 6 caracteres', 'error'); return; }
+
+    // Verificar duplicado consultando Sheets actualizado
+    await cargarUsuarios();
+    const usuarios = getUsuarios();
+    if (usuarios.find(u => u.usuario === usuario)) {
+      showToast(`❌ El usuario "@${usuario}" ya existe. Prueba con "${usuario}2" o agrega tu inicial.`, 'error');
+      return;
+    }
+
+    // Verificar también si el nombre completo ya existe
+    if (usuarios.find(u => u.nombre.toLowerCase() === nombre.toLowerCase())) {
+      showToast(`⚠️ Ya existe un usuario con el nombre "${nombre}". Verifica si ya está creado.`, 'error');
+      return;
+    }
+
+    // Guardar en Sheets
+    try {
+      const params = new URLSearchParams({ action:'guardarUsuario', nombre, usuario, contrasena: pass, rol });
+      const res  = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+      const data = await res.json();
+      if (!data.success) { showToast('Error al guardar', 'error'); return; }
+    } catch(e) {
+      showToast('Error de conexion', 'error'); return;
+    }
+    await cargarUsuarios();
+    renderUsuarios();
+    toggleFormNuevoUsuario();
+    document.getElementById('nu-nombre').value  = '';
+    document.getElementById('nu-usuario').value = '';
+    document.getElementById('nu-pass').value    = '';
+    showToast('Usuario creado correctamente');
+  }
+
+  async function eliminarUsuario(idx) {
+    if (!confirm('Eliminar este usuario?')) return;
+    const usuarios = getUsuarios();
+    const u = usuarios[idx];
+    try {
+      const params = new URLSearchParams({ action:'eliminarUsuario', usuario: u.usuario });
+      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    } catch(e) {}
+    await cargarUsuarios();
+    renderUsuarios();
+    showToast('Usuario eliminado');
+  }
+
+  function _eliminarUsuario_old(idx) {
+    const usuarios = getUsuarios();
+    usuarios.splice(idx, 1);
+    saveUsuarios(usuarios);
+    renderUsuarios();
+    renderEncargados();
+    showToast('Usuario eliminado');
+  }
+
+  // ── Cambiar contraseña ──
+  function cambiarClave() {
+    const actual  = document.getElementById('cp-actual').value;
+    const nueva   = document.getElementById('cp-nueva').value;
+    const repetir = document.getElementById('cp-repetir').value;
+
+    if (nueva.length < 6) { showToast('La nueva contraseña debe tener al menos 6 caracteres', 'error'); return; }
+    if (nueva !== repetir) { showToast('Las contraseñas no coinciden', 'error'); return; }
+
+    // Admin cambia su clave
+    if (usuarioActual.rol === 'admin') {
+      if (actual !== ADMIN.contrasena) { showToast('Contraseña actual incorrecta', 'error'); return; }
+      ADMIN.contrasena = nueva;
+      showToast('✅ Contraseña de admin actualizada');
+    } else {
+      // Supervisor cambia su clave
+      const usuarios = getUsuarios();
+      const idx = usuarios.findIndex(u => u.usuario === usuarioActual.usuario);
+      if (idx === -1 || actual !== usuarios[idx].contrasena) { showToast('Contraseña actual incorrecta', 'error'); return; }
+      usuarios[idx].contrasena = nueva;
+      usuarioActual.contrasena = nueva;
+      saveUsuarios(usuarios);
+      showToast('✅ Contraseña actualizada correctamente');
+    }
+
+    document.getElementById('cp-actual').value  = '';
+    document.getElementById('cp-nueva').value   = '';
+    document.getElementById('cp-repetir').value = '';
+  }
+
+
+  // ══ ENCARGADOS ══
+  // Encargados almacenados en Google Sheets
+  let encargadosCache = [];
+
+  async function cargarEncargados() {
+    try {
+      const res  = await fetch(`${APPS_SCRIPT_URL}?action=getEncargados`);
+      const data = await res.json();
+      encargadosCache = data.encargados || [];
+    } catch(e) {
+      encargadosCache = [];
+    }
+  }
+  function getEncargados() { return encargadosCache; }
+  function renderEncargados() {
+    const encargados = getEncargados();
+    const lista = document.getElementById('lista-encargados');
+    if (!lista) return;
+    if (encargados.length === 0) {
+      lista.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.85rem;">No hay encargados registrados.</div>';
+      return;
+    }
+    lista.innerHTML = encargados.map((e, i) => `
+      <div class="user-row">
+        <div class="user-avatar">${e.nombre.charAt(0).toUpperCase()}</div>
+        <div class="user-info">
+          <div class="user-name">${e.nombre}</div>
+          <div class="user-role">${e.correo}</div>
+        </div>
+        <button class="btn-del-user" onclick="eliminarEncargado(${i})">Eliminar</button>
+      </div>
+    `).join('');
+  }
+  function toggleFormNuevoEncargado() {
+    document.getElementById('form-nuevo-encargado').classList.toggle('visible');
+  }
+  async function guardarNuevoEncargado() {
+    const nombre = document.getElementById('ne-nombre').value.trim();
+    const correo = document.getElementById('ne-correo').value.trim();
+    if (!nombre || !correo) { showToast('Completa nombre y correo', 'error'); return; }
+    const encargados = getEncargados();
+    try {
+      const params = new URLSearchParams({ action:'guardarEncargado', nombre, correo });
+      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    } catch(e) {}
+    await cargarEncargados();
+    renderEncargados();
+    toggleFormNuevoEncargado();
+    document.getElementById('ne-nombre').value = '';
+    document.getElementById('ne-correo').value = '';
+    showToast('✅ Encargado agregado');
+  }
+  async function eliminarEncargado(idx) {
+    if (!confirm('¿Eliminar este encargado?')) return;
+    const encargados = getEncargados();
+    const enc = encargados[idx];
+    try {
+      const params = new URLSearchParams({ action:'eliminarEncargado', nombre: enc.nombre });
+      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    } catch(e) {}
+    await cargarEncargados();
+    renderEncargados();
+    showToast('Encargado eliminado');
+  }
+
+  // ══ MODAL ASIGNAR ══
+  let ticketParaAsignar = null;
+  let ubicParaAsignar   = '';
+  let descParaAsignar   = '';
+
+  function abrirModalAsignar(ticketId, ubicacion, descripcion) {
+    ticketParaAsignar = ticketId;
+    ubicParaAsignar   = ubicacion;
+    descParaAsignar   = descripcion;
+    document.getElementById('asignar-ticket').value         = ticketId;
+    document.getElementById('asignar-ticket-display').textContent = ticketId;
+    document.getElementById('asignar-nombre').value  = '';
+    document.getElementById('asignar-correo').value  = '';
+
+    // Llenar select con encargados
+    const enc = getEncargados();
+    const sel = document.getElementById('asignar-select');
+    sel.innerHTML = '<option value="">-- Seleccionar --</option>' +
+      enc.map(e => `<option value="${e.nombre}|${e.correo}">${e.nombre}</option>`).join('');
+
+    document.getElementById('modal-asignar').classList.add('visible');
+  }
+
+  function rellenarCorreo() {
+    const sel = document.getElementById('asignar-select');
+    const val = sel.value;
+    if (!val) return;
+    const [nombre, correo] = val.split('|');
+    document.getElementById('asignar-nombre').value = nombre;
+    document.getElementById('asignar-correo').value = correo;
+  }
+
+  function cerrarModalAsignar() {
+    document.getElementById('modal-asignar').classList.remove('visible');
+    ticketParaAsignar = null;
+  }
+
+  async function confirmarAsignacion() {
+    const encargado       = document.getElementById('asignar-nombre').value.trim();
+    const correoEncargado = document.getElementById('asignar-correo').value.trim();
+    if (!encargado || !correoEncargado) { showToast('Completa nombre y correo del encargado', 'error'); return; }
+
+    // Detectar si es reasignación (ticket ya tenía encargado)
+    const ticketActual = tickets.find(x => x.ticket === ticketParaAsignar);
+    const esReasignacion = ticketActual && ticketActual.encargado ? 'true' : 'false';
+
+    try {
+      const params = new URLSearchParams({
+        action:      'asignarEncargado',
+        ticket:      ticketParaAsignar,
+        encargado,
+        correo:      correoEncargado,
+        ubicacion:   ubicParaAsignar,
+        descripcion: descParaAsignar,
+        reasignar:   esReasignacion,
+      });
+      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    } catch(e) {}
+
+    // Si es reasignación, limpiar datos locales también
+    if (esReasignacion === 'true' && ticketActual) {
+      ticketActual.comentarioRep = '';
+      ticketActual.fotosRep      = '';
+      ticketActual.fechaCierre   = '';
+      ticketActual.estado        = 'Intervenido';
+    }
+
+    // Actualizar localmente
+    const t = tickets.find(x => x.ticket === ticketParaAsignar);
+    if (t) { t.estado = 'Asignado'; t.encargado = encargado; }
+
+    cerrarModalAsignar();
+    aplicarFiltros();
+    actualizarStats();
+    showToast(`✅ Asignado a ${encargado} — correo enviado`);
+  }
+
+  // ── Editar usuario ──
+  let editIdx = null;
+
+  function abrirModalEdit(idx) {
+    const usuarios = getUsuarios();
+    const u = usuarios[idx];
+    editIdx = idx;
+    document.getElementById('edit-nombre').value  = u.nombre;
+    document.getElementById('edit-usuario').value = u.usuario;
+    document.getElementById('edit-pass').value    = '';
+    document.getElementById('edit-rol').value     = u.rol || 'supervisor';
+    document.getElementById('modal-edit').classList.add('visible');
+  }
+
+  function cerrarModalEdit() {
+    document.getElementById('modal-edit').classList.remove('visible');
+    editIdx = null;
+  }
+
+  async function guardarEdicionUsuario() {
+    if (editIdx === null) return;
+    const nombre  = document.getElementById('edit-nombre').value.trim();
+    const usuario = document.getElementById('edit-usuario').value.trim();
+    const pass    = document.getElementById('edit-pass').value;
+    const rol     = document.getElementById('edit-rol').value;
+
+    if (!nombre || !usuario) { showToast('Nombre y usuario son obligatorios', 'error'); return; }
+    if (pass && pass.length < 6) { showToast('La contraseña debe tener al menos 6 caracteres', 'error'); return; }
+
+    const usuarios = getUsuarios();
+
+    // Verificar que el usuario no esté duplicado (excepto el mismo)
+    const duplicado = usuarios.find((u, i) => u.usuario === usuario && i !== editIdx);
+    if (duplicado) { showToast('Ese nombre de usuario ya existe', 'error'); return; }
+
+    usuarios[editIdx].nombre  = nombre;
+    usuarios[editIdx].usuario = usuario;
+    usuarios[editIdx].rol     = rol;
+    if (pass) usuarios[editIdx].contrasena = pass;
+
+    saveUsuarios(usuarios);
+    renderUsuarios();
+    renderEncargados();
+    cerrarModalEdit();
+    showToast('✅ Usuario actualizado correctamente');
+  }
+
+  // ── Helpers de rol ──
+  function getRolBadge(rol) {
+    const map = { supervisor: 'supervisor', direccion: 'direccion', administracion: 'administracion' };
+    return map[rol] || 'supervisor';
+  }
+  function getRolLabel(rol) {
+    const map = { supervisor: 'Supervisor', direccion: 'Dirección', administracion: 'Administración' };
+    return map[rol] || rol;
+  }
+  function puedeGestionar() {
+    return usuarioActual && usuarioActual.rol === 'admin';
+  }
+  function puedeCerrar() {
+    return usuarioActual && (usuarioActual.rol === 'admin' || usuarioActual.rol === 'supervisor');
+  }
+
+  // ── Toggle ver/ocultar contraseña ──
+  function toggleVer(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btn.textContent = '👁';
+    }
+  }
+
+  // ══════════════════════════════════════════════════════
+  // CARGAR TICKETS DESDE APPS SCRIPT
+  // ══════════════════════════════════════════════════════
+  async function cargarTickets() {
+    try {
+      const res  = await fetch(`${APPS_SCRIPT_URL}?action=getTickets`);
+      const data = await res.json();
+      tickets = data.tickets || [];
+    } catch (e) {
+      console.log('Error cargando tickets:', e);
+      tickets = [];
+    }
+    aplicarFiltros();
+    actualizarStats();
+  }
+
+  // ══════════════════════════════════════════════════════
+  // FILTROS Y BÚSQUEDA
+  // ══════════════════════════════════════════════════════
+  function filtrar(estado, btn) {
+    filtrActual = estado;
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    aplicarFiltros();
+  }
+
+  function buscar(texto) {
+    busquedaActual = texto.toLowerCase();
+    aplicarFiltros();
+  }
+
+  function aplicarFiltros() {
+    ticketsFiltro = tickets.filter(t => {
+      const estadoOk = filtrActual === 'todos' || t.estado === filtrActual;
+      const busqOk   = !busquedaActual ||
+        t.ticket.toLowerCase().includes(busquedaActual) ||
+        t.nombre.toLowerCase().includes(busquedaActual) ||
+        t.ubicacion.toLowerCase().includes(busquedaActual) ||
+        t.descripcion.toLowerCase().includes(busquedaActual);
+      return estadoOk && busqOk;
+    });
+    renderTabla();
+    renderMobileCards();
+  }
+
+  // ══════════════════════════════════════════════════════
+  // RENDER TABLA
+  // ══════════════════════════════════════════════════════
+  function renderTabla() {
+    const tbody = document.getElementById('tabla-body');
+
+    if (ticketsFiltro.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="12" class="no-rows">No hay registros que mostrar.</td></tr>`;
+      return;
+    }
+
+    // render tabla desktop
+    tbody.innerHTML = ticketsFiltro.map(t => `
+      <tr>
+        <td><span class="ticket-id" style="font-size:0.78rem;">${t.ticket}</span></td>
+        <td style="font-size:0.78rem;color:var(--gray);">${t.fecha}<br>${t.hora}</td>
+        <td style="font-size:0.8rem;">${t.nombre}</td>
+        <td style="font-size:0.82rem;font-weight:600;">${t.ubicacion}</td>
+        <td style="font-size:0.78rem;color:var(--gray);">${truncar(t.descripcion, 40)}</td>
+        <td style="text-align:center;">
+          ${t.fotoUrl && t.fotoUrl !== 'Sin fotografía'
+            ? `<a href="${t.fotoUrl}" target="_blank" class="foto-link" style="font-size:0.75rem;">📁 Ver</a>`
+            : `<span style="color:#ccc;">—</span>`}
+        </td>
+        <td>
+          <span class="badge ${{'Abierto':'abierto','Intervenido':'intervenido','Crítico':'critico','Cerrado':'cerrado'}[t.estado]||'abierto'}" style="font-size:0.65rem;padding:3px 6px;white-space:nowrap;display:inline-block;max-width:100%;">
+            ${{ 'Abierto':'⚠️','Intervenido':'🔧','Crítico':'🚨','Cerrado':'✅' }[t.estado]||'⚠️'} ${t.estado}
+          </span>
+        </td>
+        <td style="font-size:0.8rem;color:var(--navy);">
+          ${t.encargado || '<span style="color:#ccc;">—</span>'}
+        </td>
+        <td style="font-size:0.78rem;color:var(--gray);">
+          ${t.comentarioRep ? truncar(t.comentarioRep, 45) : '<span style="color:#ccc;">—</span>'}
+        </td>
+        <td style="font-size:0.75rem;">
+          ${t.fotosRep
+            ? `<a href="${t.fotosRep.split(' | ')[0]}" target="_blank" class="foto-link">📁 Ver carpeta</a>`
+            : '<span style="color:#ccc;">—</span>'}
+        </td>
+        <td style="font-size:0.75rem;color:var(--gray);">
+          ${t.fechaCierre && !t.fechaCierre.includes('1969') ? t.fechaCierre : '<span style="color:#ccc;">—</span>'}
+        </td>
+        <td>
+          <div class="accion-wrap">
+          ${puedeCerrar()
+            ? `<div style="display:flex;flex-direction:column;gap:5px;">
+                <button class="btn-cerrar"
+                  onclick="abrirModal('${t.ticket}')"
+                  ${t.estado === 'Cerrado' ? 'disabled' : ''}>
+                  ${t.estado === 'Cerrado' ? '✅ Cerrado' : 'Cerrar ticket'}
+                </button>
+                ${t.estado !== 'Cerrado' && !t.encargado
+                  ? `<button class="btn-asignar" style="width:100%;" onclick="abrirModalAsignar('${t.ticket}','${t.ubicacion}','${t.descripcion}')">👤 Asignar</button>`
+                  : ''}
+                ${t.estado !== 'Cerrado' && !t.encargado
+                  ? `<button class="btn-critico" style="width:100%;" onclick="marcarCritico('${t.ticket}')">🚨 Crítico</button>`
+                  : ''}
+                ${(usuarioActual && (usuarioActual.rol === 'admin' || usuarioActual.rol === 'supervisor'))
+                  ? `<button class="btn-menu-dots" onclick="toggleMenuDots(event,'${t.ticket}')">⋯ Opciones</button>`
+                  : ''}
+              </div>`
+            : `<span style="font-size:0.75rem;color:var(--gray);">Solo lectura</span>`
+          }
+          <div class="menu-dots-dropdown" id="menu-${t.ticket}" style="display:none;">
+            <button class="menu-dots-item" onclick="abrirModalEstado('${t.ticket}')">🔄 Cambiar estado</button>
+            <button class="menu-dots-item" onclick="cambiarEncargadoModal('${t.ticket}','${t.ubicacion}','${t.descripcion}')">👤 Cambiar encargado</button>
+            <button class="menu-dots-item" style="color:var(--danger);" onclick="eliminarTicket('${t.ticket}')">🗑️ Eliminar ticket</button>
+          </div>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ── Render tarjetas móvil ──
+  function renderMobileCards() {
+    const container = document.getElementById('tickets-mobile');
+    if (!container) return;
+
+    if (ticketsFiltro.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--gray);font-size:0.88rem;">No hay registros que mostrar.</div>';
+      return;
+    }
+
+    container.innerHTML = ticketsFiltro.map(t => `
+      <div class="ticket-card ${t.estado === 'Abierto' ? 'abierto' : 'cerrado'}">
+        <div class="ticket-card-header">
+          <span class="ticket-card-id">${t.ticket}</span>
+          <span class="badge ${{'Abierto':'abierto','Intervenido':'intervenido','Crítico':'critico','Cerrado':'cerrado'}[t.estado]||'abierto'}">
+            ${{
+              'Abierto':     '⚠️',
+              'Intervenido': '🔧',
+              'Crítico':     '🚨',
+              'Cerrado':     '✅'
+            }[t.estado] || '⚠️'} ${t.estado}
+          </span>
+        </div>
+        <div class="ticket-card-body">
+          <div class="ticket-card-field">
+            <label>Fecha</label>
+            <span>${t.fecha} ${t.hora}</span>
+          </div>
+          <div class="ticket-card-field">
+            <label>Reportado por</label>
+            <span>${t.nombre}</span>
+          </div>
+          <div class="ticket-card-field">
+            <label>Ubicación</label>
+            <span>${t.ubicacion}</span>
+          </div>
+          <div class="ticket-card-field">
+            <label>Foto reporte</label>
+            <span>${t.fotoUrl && t.fotoUrl !== 'Sin fotografía'
+              ? `<a href="${t.fotoUrl}" target="_blank" style="color:var(--gold);font-weight:600;">Ver →</a>`
+              : '—'}</span>
+          </div>
+          ${t.encargado ? `
+          <div class="ticket-card-field">
+            <label>Encargado</label>
+            <span>${t.encargado}</span>
+          </div>` : ''}
+          ${t.comentarioRep ? `
+          <div class="ticket-card-field" style="grid-column:1/-1;">
+            <label>Comentario reparación</label>
+            <span style="font-size:0.8rem;color:var(--gray);">${t.comentarioRep}</span>
+          </div>` : ''}
+          ${t.fotosRep && t.fotosRep !== 'Sin fotografías' ? `
+          <div class="ticket-card-field">
+            <label>Fotos reparación</label>
+            <span>${t.fotosRep.split(' | ').map((url,i) => `<a href="${url}" target="_blank" style="color:#2563eb;font-weight:600;">Foto ${i+1}</a>`).join(' ')}</span>
+          </div>` : ''}
+          ${t.fechaCierre ? `
+          <div class="ticket-card-field">
+            <label>Fecha cierre</label>
+            <span>${t.fechaCierre}</span>
+          </div>` : ''}
+        </div>
+        <div class="ticket-card-desc">${t.descripcion}</div>
+        <div class="ticket-card-footer">
+          ${puedeCerrar()
+            ? `<div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+                <button class="btn-cerrar" onclick="abrirModal('${t.ticket}')" ${t.estado === 'Cerrado' ? 'disabled' : ''} style="width:100%;">
+                  ${t.estado === 'Cerrado' ? '✅ Cerrado' : 'Cerrar ticket'}
+                </button>
+                ${t.estado !== 'Cerrado' ? `<button class="btn-asignar" onclick="abrirModalAsignar('${t.ticket}','${t.ubicacion}','${t.descripcion}')" style="width:100%;">👤 Asignar encargado</button>` : ''}
+                ${t.estado !== 'Cerrado' && t.estado !== 'Crítico' ? `<button class="btn-critico" onclick="marcarCritico('${t.ticket}')" style="width:100%;">🚨 Marcar como Crítico</button>` : ''}
+               </div>`
+            : `<span style="font-size:0.75rem;color:var(--gray);">Solo lectura</span>`
+          }
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function truncar(texto, max) {
+    return texto.length > max ? texto.substring(0, max) + '…' : texto;
+  }
+
+  // ══════════════════════════════════════════════════════
+  // STATS
+  // ══════════════════════════════════════════════════════
+  function actualizarStats() {
+    const abiertos    = tickets.filter(t => t.estado === 'Abierto').length;
+    const intervenidos= tickets.filter(t => t.estado === 'Intervenido').length;
+    const criticos    = tickets.filter(t => t.estado === 'Crítico').length;
+    const cerrados    = tickets.filter(t => t.estado === 'Cerrado').length;
+    document.getElementById('stat-total').textContent       = tickets.length;
+    document.getElementById('stat-abiertos').textContent    = abiertos;
+    document.getElementById('stat-intervenidos').textContent= intervenidos;
+    document.getElementById('stat-criticos').textContent    = criticos;
+    document.getElementById('stat-cerrados').textContent    = cerrados;
+  }
+
+  // Filtrar desde tarjeta del dashboard
+  function filtrarDesdeCard(estado) {
+    const btnId = estado === 'todos' ? 'fbtn-todos' : `fbtn-${estado}`;
+    const btn   = document.getElementById(btnId);
+    if (btn) filtrar(estado, btn);
+    // Scroll suave a la tabla
+    document.querySelector('.filtros-bar').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ══════════════════════════════════════════════════════
+  // CERRAR TICKET
+  // ══════════════════════════════════════════════════════
+  function abrirModal(ticketId) {
+    ticketParaCerrar = ticketId;
+    document.getElementById('modal-ticket-id').textContent = ticketId;
+    document.getElementById('modal').style.display = 'flex';
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal').style.display = 'none';
+    ticketParaCerrar = null;
+  }
+
+  async function confirmarCierre() {
+    // Guardar el ID ANTES de cerrar el modal (cerrarModal lo pone en null)
+    const ticketId = ticketParaCerrar;
+    cerrarModal();
+
+    if (!ticketId) return;
+
+    const ahora = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    const fechaCierre = `${pad(ahora.getDate())}/${pad(ahora.getMonth()+1)}/${ahora.getFullYear()} ${pad(ahora.getHours())}:${pad(ahora.getMinutes())}`;
+
+    // Actualizar localmente
+    const t = tickets.find(x => x.ticket === ticketId);
+    if (!t) return;
+    t.estado      = 'Cerrado';
+    t.fechaCierre = fechaCierre;
+
+    // Enviar al Apps Script via GET (evita CORS)
+    try {
+      const params = new URLSearchParams({
+        action:      'cerrarTicket',
+        ticket:      ticketId,
+        fechaCierre,
+      });
+      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    } catch(e) {}
+
+    aplicarFiltros();
+    actualizarStats();
+    showToast('✅ Ticket cerrado correctamente');
+  }
+
+  // ══════════════════════════════════════════════════════
+  // TOAST
+  // ══════════════════════════════════════════════════════
+
+
+  // ── Modal cambiar estado ──
+  let ticketParaEstado = null;
+
+  function abrirModalEstado(ticketId) {
+    document.querySelectorAll('.menu-dots-dropdown').forEach(m => m.style.display = 'none');
+    ticketParaEstado = ticketId;
+    document.getElementById('estado-ticket-display').textContent = ticketId;
+    document.getElementById('modal-estado').classList.add('visible');
+  }
+
+  function cerrarModalEstado() {
+    document.getElementById('modal-estado').classList.remove('visible');
+    ticketParaEstado = null;
+  }
+
+  async function cambiarEstado(nuevoEstado) {
+    if (!ticketParaEstado) return;
+    const ticketId = ticketParaEstado;
+    cerrarModalEstado();
+
+    // Usar nombre sin tilde para URL
+    const estadoUrl = nuevoEstado === 'Crítico' ? 'Critico' : nuevoEstado;
+
+    try {
+      const params = new URLSearchParams({
+        action: 'cambiarEstado',
+        ticket: ticketId,
+        estado: estadoUrl,
+      });
+      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    } catch(e) {}
+
+    // Actualizar localmente
+    const t = tickets.find(x => x.ticket === ticketId);
+    if (t) {
+      t.estado        = nuevoEstado;
+      t.fechaCierre   = '';
+      t.comentarioRep = '';
+      t.fotosRep      = '';
+      // Si vuelve a Abierto, limpiar encargado también
+      if (nuevoEstado === 'Abierto') {
+        t.encargado = '';
+      }
+    }
+    aplicarFiltros();
+    actualizarStats();
+    showToast(`✅ Estado cambiado a ${nuevoEstado}`);
+
+    // Si cambió a Intervenido, abrir modal de asignar encargado
+    if (nuevoEstado === 'Intervenido' && t) {
+      setTimeout(() => {
+        abrirModalAsignar(ticketId, t.ubicacion || '', t.descripcion || '');
+      }, 400);
+    }
+  }
+
+  // ── Cambiar encargado ──
+  function cambiarEncargadoModal(ticketId, ubicacion, descripcion) {
+    document.querySelectorAll('.menu-dots-dropdown').forEach(m => m.style.display = 'none');
+    abrirModalAsignar(ticketId, ubicacion, descripcion);
+  }
+
+  // ── Eliminar ticket ──
+  async function eliminarTicket(ticketId) {
+    document.querySelectorAll('.menu-dots-dropdown').forEach(m => m.style.display = 'none');
+    if (!confirm(`¿Eliminar el ticket ${ticketId}? Esta acción no se puede deshacer.`)) return;
+    try {
+      const params = new URLSearchParams({ action: 'eliminarTicket', ticket: ticketId });
+      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    } catch(e) {}
+    // Eliminar localmente
+    tickets = tickets.filter(x => x.ticket !== ticketId);
+    aplicarFiltros();
+    actualizarStats();
+    showToast('🗑️ Ticket eliminado');
+  }
+
+  // ── Menú 3 puntitos ──
+  function toggleMenuDots(event, ticketId) {
+    event.stopPropagation();
+    // Cerrar todos los otros menús
+    document.querySelectorAll('.menu-dots-dropdown').forEach(m => m.style.display = 'none');
+    const menu = document.getElementById('menu-' + ticketId);
+    if (!menu) return;
+    // Posicionar con fixed relativo al botón
+    const btn  = event.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    if (spaceBelow < 120) {
+      // Poco espacio abajo → mostrar arriba
+      menu.style.top    = (rect.top - 90) + 'px';
+    } else {
+      menu.style.top    = (rect.bottom + 4) + 'px';
+    }
+    menu.style.right = (window.innerWidth - rect.right) + 'px';
+    menu.style.left  = 'auto';
+    menu.style.display = 'block';
+  }
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.menu-dots-dropdown').forEach(m => m.style.display = 'none');
+  });
+  async function reabrirTicket(ticketId) {
+    if (!usuarioActual || (usuarioActual.rol !== 'admin' && usuarioActual.rol !== 'supervisor')) {
+      showToast('No tienes permiso para esta acción', 'error'); return;
+    }
+    if (!confirm('¿Editar el cierre? El ticket volverá a estado Abierto.')) return;
+    document.querySelectorAll('.menu-dots-dropdown').forEach(m => m.style.display = 'none');
+    try {
+      const params = new URLSearchParams({ action: 'reabrirTicket', ticket: ticketId });
+      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    } catch(e) {}
+    const t = tickets.find(x => x.ticket === ticketId);
+    if (t) { t.estado = 'Abierto'; t.fechaCierre = ''; }
+    aplicarFiltros();
+    actualizarStats();
+    showToast('🔓 Ticket reabierto para edición');
+  }
+
+  // ── Marcar Crítico ──
+  async function marcarCritico(ticketId) {
+    if (!confirm('¿Marcar este ticket como CRÍTICO?')) return;
+    try {
+      const params = new URLSearchParams({ action: 'cambiarEstado', ticket: ticketId, estado: 'Critico' });
+      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    } catch(e) {}
+    const t = tickets.find(x => x.ticket === ticketId);
+    if (t) { t.estado = 'Crítico'; t.comentarioRep = ''; t.fotosRep = ''; t.fechaCierre = ''; }
+    aplicarFiltros();
+    actualizarStats();
+    showToast('🚨 Ticket marcado como Crítico', 'error');
+  }
+
+  function showToast(msg, tipo = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.className = `toast ${tipo}`;
+    setTimeout(() => t.classList.add('show'), 10);
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+
+  // ══ ESTADÍSTICAS ══
+  let periodoActual = 'todo';
+
+  async function mostrarStats() {
+    sessionStorage.setItem('sek_pantalla', 'stats');
+    document.getElementById('panel-screen').style.display       = 'none';
+    document.getElementById('admin-screen').style.display       = 'none';
+    document.getElementById('encargados-screen').style.display  = 'none';
+    document.getElementById('stats-screen').style.display       = 'flex';
+
+    // Copiar logo al topbar de estadísticas
+    const logoMain  = document.querySelector('#login-screen img') || document.querySelector('.topbar img');
+    const logoStats = document.getElementById('stats-logo');
+    if (logoMain && logoStats) logoStats.src = logoMain.src;
+
+    // Mostrar loading en KPIs
+    ['kpi-total','kpi-pendientes','kpi-cerrados','kpi-tiempo'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '...';
+    });
+
+    // Recargar tickets frescos desde Sheets
+    try {
+      const res  = await fetch(`${APPS_SCRIPT_URL}?action=getTickets`);
+      const data = await res.json();
+      tickets    = data.tickets || [];
+    } catch(e) {
+      console.log('Error cargando tickets para stats:', e);
+    }
+    console.log('Stats - tickets cargados:', tickets.length);
+    calcularStats();
+  }
+
+  function volverDesdeStats() {
+    sessionStorage.setItem('sek_pantalla', 'panel');
+    document.getElementById('stats-screen').style.display = 'none';
+    document.getElementById('panel-screen').style.display = 'flex';
+  }
+
+  function cambiarPeriodo(periodo, btn) {
+    periodoActual = periodo;
+    document.querySelectorAll('.periodo-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    calcularStats();
+  }
+
+  function filtrarPorPeriodo(ticketsList) {
+    const hoy   = new Date();
+    const inicio = new Date();
+    if (periodoActual === 'semana') inicio.setDate(hoy.getDate() - 7);
+    else if (periodoActual === 'mes')  inicio.setMonth(hoy.getMonth() - 1);
+    else if (periodoActual === 'año')  inicio.setFullYear(hoy.getFullYear() - 1);
+    else return ticketsList;
+
+    return ticketsList.filter(t => {
+      if (!t.fecha) return false;
+      const parts = t.fecha.split('/');
+      if (parts.length < 3) return false;
+      const d = new Date(parts[2], parts[1]-1, parts[0]);
+      return d >= inicio;
+    });
+  }
+
+  function parseFecha(str) {
+    if (!str) return null;
+    // Tomar solo la parte de fecha (ignorar hora si viene "02/04/2026 16:32")
+    const soloFecha = str.split(' ')[0];
+    const parts = soloFecha.split('/');
+    if (parts.length < 3) return null;
+    const d = parseInt(parts[0]), m = parseInt(parts[1])-1, y = parseInt(parts[2]);
+    if (isNaN(d) || isNaN(m) || isNaN(y)) return null;
+    return new Date(y, m, d);
+  }
+
+  function calcularStats() {
+    console.log('calcularStats - tickets:', tickets.length, 'periodo:', periodoActual);
+    const filtrados = filtrarPorPeriodo(tickets);
+    console.log('filtrados:', filtrados.length);
+    const total     = filtrados.length;
+    const cerrados  = filtrados.filter(t => t.estado === 'Cerrado').length;
+    const pendientes= filtrados.filter(t => t.estado === 'Abierto' || t.estado === 'Crítico').length;
+    const tasa      = total > 0 ? Math.round(cerrados / total * 100) : 0;
+
+    // Tiempo promedio de resolución
+    let tiempoTotal = 0, tiempoCount = 0;
+    filtrados.forEach(t => {
+      if (t.estado === 'Cerrado' && t.fecha && t.fechaCierre) {
+        const ini = parseFecha(t.fecha);
+        const fin = parseFecha(t.fechaCierre);
+        if (ini && fin && fin > ini) {
+          tiempoTotal += (fin - ini) / (1000 * 60 * 60 * 24);
+          tiempoCount++;
+        }
+      }
+    });
+    const tiempoPromedio = tiempoCount > 0 ? (tiempoTotal / tiempoCount).toFixed(1) : '—';
+
+    // Actualizar KPIs
+    document.getElementById('kpi-total').textContent      = total;
+    document.getElementById('kpi-pendientes').textContent = pendientes;
+    document.getElementById('kpi-cerrados').textContent   = cerrados;
+    document.getElementById('kpi-tiempo').textContent     = tiempoPromedio;
+    document.getElementById('kpi-tasa').textContent       = `tasa: ${tasa}%`;
+
+    // Gráfico estados
+    const estados = {
+      'Abierto':     filtrados.filter(t => t.estado === 'Abierto').length,
+      'Intervenido': filtrados.filter(t => t.estado === 'Intervenido').length,
+      'Crítico':     filtrados.filter(t => t.estado === 'Crítico').length,
+      'Cerrado':     filtrados.filter(t => t.estado === 'Cerrado').length,
+    };
+
+    // Gráfico dona SVG puro (sin librería)
+    const donaColores = {
+      'Abierto':     { fill: '#fef3c7', stroke: '#f59e0b' },
+      'Intervenido': { fill: '#2563eb', stroke: '#1d4ed8' },
+      'Crítico':     { fill: '#dc2626', stroke: '#b91c1c' },
+      'Cerrado':     { fill: '#d1fae5', stroke: '#10b981' },
+    };
+    const totalEstados = Object.values(estados).reduce((a,b) => a+b, 0);
+    const svg    = document.getElementById('dona-svg');
+    const leyenda = document.getElementById('dona-leyenda');
+    svg.innerHTML = '';
+    leyenda.innerHTML = '';
+
+    if (totalEstados === 0) {
+      svg.innerHTML = '<text x="80" y="85" text-anchor="middle" font-size="12" fill="#999">Sin datos</text>';
+    } else {
+      const cx = 80, cy = 80, r = 60, ri = 35;
+      let angulo = -Math.PI / 2;
+      Object.entries(estados).forEach(([label, val]) => {
+        if (val === 0) return;
+        const pct   = val / totalEstados;
+        const sweep = pct * 2 * Math.PI;
+        const x1 = cx + r * Math.cos(angulo);
+        const y1 = cy + r * Math.sin(angulo);
+        const x2 = cx + r * Math.cos(angulo + sweep);
+        const y2 = cy + r * Math.sin(angulo + sweep);
+        const xi1 = cx + ri * Math.cos(angulo);
+        const yi1 = cy + ri * Math.sin(angulo);
+        const xi2 = cx + ri * Math.cos(angulo + sweep);
+        const yi2 = cy + ri * Math.sin(angulo + sweep);
+        const large = sweep > Math.PI ? 1 : 0;
+        const col   = donaColores[label] || { fill: '#ccc', stroke: '#999' };
+        const path  = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d', `M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} L${xi2},${yi2} A${ri},${ri} 0 ${large},0 ${xi1},${yi1} Z`);
+        path.setAttribute('fill', col.fill);
+        path.setAttribute('stroke', col.stroke);
+        path.setAttribute('stroke-width', '1.5');
+        svg.appendChild(path);
+        angulo += sweep;
+
+        // Leyenda
+        const item = document.createElement('div');
+        item.style.cssText = 'display:flex;align-items:center;gap:6px;';
+        item.innerHTML = `<span style="width:12px;height:12px;border-radius:3px;background:${col.fill};border:1.5px solid ${col.stroke};flex-shrink:0;"></span>
+          <span style="color:var(--navy);">${label}: <strong>${val}</strong></span>`;
+        leyenda.appendChild(item);
+      });
+    }
+
+    // Tabla de tiempos de resolución
+    const cerradosConTiempo = filtrados
+      .filter(t => t.estado === 'Cerrado' && t.fecha && t.fechaCierre)
+      .map(t => {
+        const ini  = parseFecha(t.fecha);
+        const fin  = parseFecha(t.fechaCierre);
+        const dias = ini && fin && fin >= ini
+          ? Math.round((fin - ini) / (1000 * 60 * 60 * 24))
+          : null;
+        return { ...t, dias };
+      })
+      .filter(t => t.dias !== null)
+      .sort((a, b) => b.dias - a.dias); // Mayor a menor
+
+    const tbodyT   = document.getElementById('tbody-tiempos');
+    const noTiempos = document.getElementById('no-tiempos');
+
+    if (cerradosConTiempo.length === 0) {
+      tbodyT.innerHTML   = '';
+      noTiempos.style.display = 'block';
+    } else {
+      noTiempos.style.display = 'none';
+      // Color según días: >5 rojo, 2-5 amarillo, <=1 verde
+      tbodyT.innerHTML = cerradosConTiempo.map(t => {
+        const color = t.dias > 5 ? '#dc2626' : t.dias > 1 ? '#d97706' : '#059669';
+        const bg    = t.dias > 5 ? '#fff1f1' : t.dias > 1 ? '#fffbeb' : '#f0fdf4';
+        return `<tr style="background:${bg};">
+          <td style="padding:8px 10px;font-weight:600;color:var(--navy);font-size:0.76rem;">${t.ticket}</td>
+          <td style="padding:8px 10px;color:#333;font-size:0.76rem;">${t.ubicacion}</td>
+          <td style="padding:8px 10px;color:var(--gray);font-size:0.76rem;">${t.encargado || '—'}</td>
+          <td style="padding:8px 10px;text-align:center;font-weight:700;color:${color};">${t.dias} día${t.dias !== 1 ? 's' : ''}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Gráfico semanal
+    const semanas = {};
+    filtrados.forEach(t => {
+      if (!t.fecha) return;
+      const parts = t.fecha.split('/');
+      if (parts.length < 3) return;
+      const d = new Date(parts[2], parts[1]-1, parts[0]);
+      // Calcular inicio de semana (lunes)
+      const lunes = new Date(d);
+      const dia   = d.getDay() === 0 ? 6 : d.getDay() - 1;
+      lunes.setDate(d.getDate() - dia);
+      const domingo = new Date(lunes);
+      domingo.setDate(lunes.getDate() + 6);
+      const fmt = n => String(n).padStart(2,'0');
+      const key = `${fmt(lunes.getDate())}/${fmt(lunes.getMonth()+1)} - ${fmt(domingo.getDate())}/${fmt(domingo.getMonth()+1)}`;
+      semanas[key] = (semanas[key] || { count: 0, inicio: lunes });
+      semanas[key].count++;
+    });
+    // Ordenar por fecha de inicio
+    const semanasOrdenadas = Object.entries(semanas)
+      .sort((a,b) => a[1].inicio - b[1].inicio)
+      .map(([k]) => k);
+
+    // Gráfico barras SVG puro - sin librería
+    const svgBar   = document.getElementById('bar-semanal-svg');
+    if (!svgBar) { /* elemento no existe */ }
+    else {
+      svgBar.innerHTML = '';
+      if (semanasOrdenadas.length === 0) {
+        svgBar.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#999" font-size="12">Sin datos en este período</text>';
+      } else {
+        const valores  = semanasOrdenadas.map(k => semanas[k].count);
+        const maxVal   = Math.max(...valores, 1);
+        const W = 600, H = 150;
+        const barW  = Math.min(40, Math.floor((W - 20) / semanasOrdenadas.length) - 6);
+        const gap   = Math.floor((W - 20) / semanasOrdenadas.length);
+        svgBar.setAttribute('viewBox', `0 0 ${W} 190`);
+        svgBar.setAttribute('width', '100%');
+        svgBar.setAttribute('height', H);
+
+        // Líneas guía
+        [0,0.25,0.5,0.75,1].forEach(p => {
+          const y = H - 20 - p*(H-30);
+          const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+          line.setAttribute('x1','10'); line.setAttribute('x2', W);
+          line.setAttribute('y1', y); line.setAttribute('y2', y);
+          line.setAttribute('stroke','#e5e1d8'); line.setAttribute('stroke-width','1');
+          svgBar.appendChild(line);
+          if (p > 0) {
+            const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+            txt.setAttribute('x','8'); txt.setAttribute('y', y+4);
+            txt.setAttribute('text-anchor','end'); txt.setAttribute('font-size','9');
+            txt.setAttribute('fill','#999');
+            txt.textContent = Math.round(p * maxVal);
+            svgBar.appendChild(txt);
+          }
+        });
+
+        valores.forEach((v, i) => {
+          const barH = Math.max(4, ((v / maxVal) * (H - 30)));
+          const x    = 16 + i * gap;
+          const y    = H - 20 - barH;
+          const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+          rect.setAttribute('x', x); rect.setAttribute('y', y);
+          rect.setAttribute('width', barW); rect.setAttribute('height', barH);
+          rect.setAttribute('fill','rgba(184,150,62,0.8)');
+          rect.setAttribute('rx','3');
+          svgBar.appendChild(rect);
+          // Valor encima de la barra
+          const val = document.createElementNS('http://www.w3.org/2000/svg','text');
+          val.setAttribute('x', x + barW/2); val.setAttribute('y', y - 4);
+          val.setAttribute('text-anchor','middle'); val.setAttribute('font-size','11');
+          val.setAttribute('fill','#b8963e'); val.setAttribute('font-weight','700');
+          val.textContent = v;
+          svgBar.appendChild(val);
+          // Etiqueta semana dentro del SVG debajo de la barra
+          const partes = semanasOrdenadas[i].split(' - ');
+          const lbl1 = document.createElementNS('http://www.w3.org/2000/svg','text');
+          lbl1.setAttribute('x', x + barW/2); lbl1.setAttribute('y', H - 2);
+          lbl1.setAttribute('text-anchor','middle'); lbl1.setAttribute('font-size','8');
+          lbl1.setAttribute('fill','#888');
+          lbl1.textContent = partes[0] || semanasOrdenadas[i];
+          svgBar.appendChild(lbl1);
+          if (partes[1]) {
+            const lbl2 = document.createElementNS('http://www.w3.org/2000/svg','text');
+            lbl2.setAttribute('x', x + barW/2); lbl2.setAttribute('y', H + 10);
+            lbl2.setAttribute('text-anchor','middle'); lbl2.setAttribute('font-size','8');
+            lbl2.setAttribute('fill','#888');
+            lbl2.textContent = partes[1];
+            svgBar.appendChild(lbl2);
+          }
+        });
+      }
+    }
+
+    // Tabla resumen
+    const tbody = document.getElementById('resumen-tbody');
+    if (filtrados.length === 0) {
+      // Mostrar mensaje según si hay tickets o no
+      if (tickets.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray);">⏳ No se pudieron cargar los tickets. Verifica la conexión.</td></tr>';
+      } else {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray);">No hay tickets en este período.</td></tr>';
+      }
+      return;
+    }
+
+    tbody.innerHTML = filtrados.map(t => {
+      let dias = '—';
+      if (t.estado === 'Cerrado' && t.fecha && t.fechaCierre) {
+        const ini = parseFecha(t.fecha);
+        const fin = parseFecha(t.fechaCierre);
+        if (ini && fin && fin >= ini) {
+          dias = Math.round((fin - ini) / (1000 * 60 * 60 * 24)) + ' día(s)';
+        }
+      }
+      return `<tr>
+        <td><input type="checkbox" class="sel-ticket" value="${t.ticket}" onchange="actualizarSeleccion()"></td>
+        <td style="font-size:0.78rem;font-weight:600;">${t.ticket}</td>
+        <td style="font-size:0.78rem;color:var(--gray);">${t.fecha}</td>
+        <td style="font-size:0.82rem;">${t.ubicacion}</td>
+        <td><span class="badge ${{ 'Abierto':'abierto','Intervenido':'intervenido','Crítico':'critico','Cerrado':'cerrado' }[t.estado]||'abierto'}" style="font-size:0.65rem;padding:3px 6px;">
+          ${{ 'Abierto':'⚠️','Intervenido':'🔧','Crítico':'🚨','Cerrado':'✅' }[t.estado]||'⚠️'} ${t.estado}
+        </span></td>
+        <td style="font-size:0.8rem;">${t.encargado || '—'}</td>
+        <td style="font-size:0.78rem;color:var(--gray);">${t.fechaCierre || '—'}</td>
+        <td style="font-size:0.78rem;text-align:center;">${dias}</td>
+      </tr>`;
+    }).join('');
+  }
+
+
+  // ── Selección de tickets para informe ──
+  function actualizarSeleccion() {
+    const seleccionados = document.querySelectorAll('.sel-ticket:checked').length;
+    const btnInforme    = document.getElementById('btn-informe');
+    const selCount      = document.getElementById('sel-count');
+    if (seleccionados > 0) {
+      btnInforme.style.display = 'block';
+      selCount.textContent     = `(${seleccionados} seleccionado${seleccionados > 1 ? 's' : ''})`;
+    } else {
+      btnInforme.style.display = 'none';
+      selCount.textContent     = '';
+    }
+  }
+
+  function seleccionarTodos(cb) {
+    document.querySelectorAll('.sel-ticket').forEach(c => c.checked = cb.checked);
+    actualizarSeleccion();
+  }
+
+  // ── Generar informe con IA ──
+  async function generarInforme() {
+    const seleccionados = Array.from(document.querySelectorAll('.sel-ticket:checked')).map(c => c.value);
+    if (seleccionados.length === 0) return;
+
+    const ticketsSelec = filtrarPorPeriodo(tickets).filter(t => seleccionados.includes(t.ticket));
+
+    // Guardar datos y mostrar modal
+    informeData = { tickets: ticketsSelec, fecha: new Date().toLocaleDateString('es-CL'), periodo: periodoActual };
+    document.getElementById('modal-informe').style.display = 'flex';
+    document.getElementById('informe-content').innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray);">⏳ Generando informe...</div>';
+
+    // Generar informe localmente sin API
+    try {
+      const hoy        = new Date().toLocaleDateString('es-CL');
+      const cerrados   = ticketsSelec.filter(t => t.estado === 'Cerrado').length;
+      const pendientes = ticketsSelec.filter(t => t.estado !== 'Cerrado').length;
+      const criticos   = ticketsSelec.filter(t => t.estado === 'Crítico').length;
+
+      // Calcular tiempo promedio
+      let tiempoTotal = 0, tiempoCount = 0;
+      ticketsSelec.forEach(t => {
+        if (t.estado === 'Cerrado' && t.fecha && t.fechaCierre) {
+          const ini = parseFecha(t.fecha);
+          const fin = parseFecha(t.fechaCierre);
+          if (ini && fin && fin > ini) {
+            tiempoTotal += (fin - ini) / (1000*60*60*24);
+            tiempoCount++;
+          }
+        }
+      });
+      const tiempoProm = tiempoCount > 0 ? (tiempoTotal/tiempoCount).toFixed(1) : 'N/A';
+
+      // Agrupar por ubicación
+      const porUbicacion = {};
+      ticketsSelec.forEach(t => {
+        porUbicacion[t.ubicacion] = (porUbicacion[t.ubicacion] || 0) + 1;
+      });
+      const ubicTop = Object.entries(porUbicacion).sort((a,b) => b[1]-a[1]);
+
+      // Construir informe
+      let informe = `INFORME DE MANTENIMIENTO
+${CONFIG_NOMBRE}
+Fecha de emisión: ${hoy}
+${'='.repeat(60)}
+
+1. RESUMEN EJECUTIVO
+${'─'.repeat(40)}
+El presente informe comprende el análisis de ${ticketsSelec.length} ticket(s) de mantenimiento seleccionados del sistema de gestión.
+
+Período analizado: ${ticketsSelec[ticketsSelec.length-1]?.fecha || '—'} al ${ticketsSelec[0]?.fecha || '—'}
+
+2. INDICADORES CLAVE (KPIs)
+${'─'.repeat(40)}
+• Total de tickets analizados : ${ticketsSelec.length}
+• Tickets resueltos (cerrados): ${cerrados} (${ticketsSelec.length > 0 ? Math.round(cerrados/ticketsSelec.length*100) : 0}%)
+• Tickets pendientes          : ${pendientes}
+• Tickets críticos            : ${criticos}
+• Tiempo prom. de resolución  : ${tiempoProm} días
+
+3. ÁREAS CON MAYOR INCIDENCIA
+${'─'.repeat(40)}
+${ubicTop.slice(0,5).map(([ ub, n], i) => `${i+1}. ${ub}: ${n} reporte(s)`).join('\n')}
+
+4. DETALLE DE TICKETS
+${'─'.repeat(40)}
+${ticketsSelec.map((t,i) => {
+  let dias = '—';
+  if (t.estado === 'Cerrado' && t.fecha && t.fechaCierre) {
+    const ini = parseFecha(t.fecha);
+    const fin = parseFecha(t.fechaCierre);
+    if (ini && fin && fin >= ini) dias = Math.round((fin-ini)/(1000*60*60*24)) + ' día(s)';
+  }
+  return `
+[${i+1}] ${t.ticket}
+   Fecha reporte : ${t.fecha} ${t.hora}
+   Ubicación     : ${t.ubicacion}
+   Descripción   : ${t.descripcion}
+   Estado        : ${t.estado}
+   Encargado     : ${t.encargado || 'No asignado'}
+   Reparación    : ${t.comentarioRep || 'Sin comentario'}
+   Fecha cierre  : ${t.fechaCierre || 'Pendiente'}
+   Tiempo resol. : ${dias}`;
+}).join('\n')}
+
+5. OBSERVACIONES Y RECOMENDACIONES
+${'─'.repeat(40)}
+${criticos > 0 ? `⚠️  Se registraron ${criticos} incidencia(s) crítica(s) que requieren atención prioritaria.\n` : ''}${pendientes > 0 ? `• Existen ${pendientes} ticket(s) pendiente(s) de resolución.\n` : '• Todos los tickets del período han sido resueltos.\n'}${ubicTop.length > 0 ? `• El área "${ubicTop[0][0]}" concentra la mayor cantidad de reportes (${ubicTop[0][1]}). Se recomienda inspección preventiva.` : ''}
+${tiempoProm !== 'N/A' && parseFloat(tiempoProm) > 3 ? `• El tiempo promedio de resolución (${tiempoProm} días) supera los 3 días. Se sugiere revisar la asignación de recursos.` : tiempoProm !== 'N/A' ? `• El tiempo promedio de resolución es de ${tiempoProm} días, dentro de parámetros aceptables.` : ''}
+
+6. CONCLUSIONES
+${'─'.repeat(40)}
+El sistema de mantenimiento de ${CONFIG_NOMBRE} ha procesado ${ticketsSelec.length} reporte(s) en el período analizado, logrando una tasa de resolución del ${ticketsSelec.length > 0 ? Math.round(cerrados/ticketsSelec.length*100) : 0}%.
+
+${'='.repeat(60)}
+Informe generado automáticamente por el Sistema de Gestión de Mantenimiento FlowCore
+Fecha: ${hoy}`;
+
+      document.getElementById('informe-content').textContent = informe;
+    } catch(err) {
+      document.getElementById('informe-content').textContent = 'Error al generar el informe: ' + err.message;
+    }
+  }
+
+  const CONFIG_NOMBRE = 'FlowCore International School – Concón';
+
+  function cerrarInforme() {
+    document.getElementById('modal-informe').style.display = 'none';
+  }
+
+  function copiarInforme() {
+    const texto = document.getElementById('informe-content').textContent;
+    navigator.clipboard.writeText(texto).then(() => showToast('📋 Informe copiado al portapapeles'));
+  }
+
+  // Guardar datos del informe para exportar Word
+  let informeData = { tickets: [], fecha: '', periodo: '' };
+
+  async function descargarWord() {
+    if (!window.docx) { showToast('Librería Word no disponible', 'error'); return; }
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+            AlignmentType, HeadingLevel, BorderStyle, WidthType, ShadingType } = window.docx;
+
+    const t       = informeData.tickets;
+    const hoy     = new Date().toLocaleDateString('es-CL');
+    const cerrados = t.filter(x => x.estado === 'Cerrado').length;
+    const pendientes = t.filter(x => x.estado !== 'Cerrado').length;
+    const tasa    = t.length > 0 ? Math.round(cerrados/t.length*100) : 0;
+
+    const border  = { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' };
+    const borders = { top: border, bottom: border, left: border, right: border };
+    const cellMargins = { top: 80, bottom: 80, left: 120, right: 120 };
+
+    const mkCell = (text, bold=false, shade='FFFFFF') => new TableCell({
+      borders, margins: cellMargins,
+      shading: { fill: shade, type: ShadingType.CLEAR },
+      width: { size: 4500, type: WidthType.DXA },
+      children: [new Paragraph({ children: [new TextRun({ text, bold, font: 'Arial', size: 20 })] })]
+    });
+
+    // Tabla KPIs
+    const tablaKPI = new Table({
+      width: { size: 9000, type: WidthType.DXA },
+      columnWidths: [4500, 4500],
+      rows: [
+        new TableRow({ children: [mkCell('Indicador', true, 'D5E8F0'), mkCell('Valor', true, 'D5E8F0')] }),
+        new TableRow({ children: [mkCell('Total tickets'), mkCell(String(t.length))] }),
+        new TableRow({ children: [mkCell('Resueltos'), mkCell(`${cerrados} (${tasa}%)`)] }),
+        new TableRow({ children: [mkCell('Pendientes'), mkCell(String(pendientes))] }),
+      ]
+    });
+
+    // Filas detalle tickets
+    const filasTix = [
+      new TableRow({ children: [
+        mkCell('Ticket', true, 'D5E8F0'), mkCell('Fecha', true, 'D5E8F0'),
+        mkCell('Ubicación', true, 'D5E8F0'), mkCell('Estado', true, 'D5E8F0'),
+      ]}),
+      ...t.map(tk => new TableRow({ children: [
+        mkCell(tk.ticket), mkCell(tk.fecha),
+        mkCell(tk.ubicacion), mkCell(tk.estado),
+      ]}))
+    ];
+
+    const tablaTix = new Table({
+      width: { size: 9000, type: WidthType.DXA },
+      columnWidths: [2500, 1500, 3000, 2000],
+      rows: filasTix
+    });
+
+    const doc = new Document({
+      sections: [{
+        properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
+        children: [
+          new Paragraph({ heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER,
+            children: [new TextRun({ text: 'INFORME DE MANTENIMIENTO', bold: true, font: 'Arial', size: 32 })] }),
+          new Paragraph({ alignment: AlignmentType.CENTER,
+            children: [new TextRun({ text: CONFIG_NOMBRE, font: 'Arial', size: 24, color: '555555' })] }),
+          new Paragraph({ alignment: AlignmentType.CENTER,
+            children: [new TextRun({ text: `Fecha de emisión: ${hoy}`, font: 'Arial', size: 20, color: '777777' })] }),
+          new Paragraph({ children: [] }),
+          new Paragraph({ heading: HeadingLevel.HEADING_2,
+            children: [new TextRun({ text: '1. Indicadores Clave (KPIs)', bold: true, font: 'Arial', size: 26 })] }),
+          tablaKPI,
+          new Paragraph({ children: [] }),
+          new Paragraph({ heading: HeadingLevel.HEADING_2,
+            children: [new TextRun({ text: '2. Detalle de Tickets', bold: true, font: 'Arial', size: 26 })] }),
+          tablaTix,
+          new Paragraph({ children: [] }),
+          new Paragraph({ heading: HeadingLevel.HEADING_2,
+            children: [new TextRun({ text: '3. Observaciones y Conclusiones', bold: true, font: 'Arial', size: 26 })] }),
+          new Paragraph({ children: [new TextRun({
+            text: pendientes > 0
+              ? `Existen ${pendientes} ticket(s) pendiente(s) de resolución que requieren atención. La tasa de resolución del período es del ${tasa}%.`
+              : `Todos los tickets del período han sido resueltos satisfactoriamente. Tasa de resolución: ${tasa}%.`,
+            font: 'Arial', size: 22
+          })] }),
+          new Paragraph({ children: [] }),
+          new Paragraph({ alignment: AlignmentType.CENTER,
+            children: [new TextRun({ text: `Generado automáticamente por el Sistema de Mantenimiento FlowCore — ${hoy}`, font: 'Arial', size: 18, color: '999999', italics: true })] }),
+        ]
+      }]
+    });
+
+    const buffer = await Packer.toBlob(doc);
+    const link   = document.createElement('a');
+    link.href     = URL.createObjectURL(buffer);
+    link.download = `Informe_FlowCore_Mantenimiento_${hoy.replace(/\//g,'-')}.docx`;
+    link.click();
+    showToast('📄 Informe Word descargado');
+  }
+
+  // Mejorar exportarCSV con nombre descriptivo
+  // Exportar CSV
+  function exportarCSV() {
+    const filtrados = filtrarPorPeriodo(tickets);
+    const headers   = ['Ticket','Fecha','Hora','Nombre','Ubicación','Descripción','Estado','Encargado','Fecha Cierre'];
+    const rows      = filtrados.map(t => [
+      t.ticket, t.fecha, t.hora, t.nombre, t.ubicacion,
+      t.descripcion, t.estado, t.encargado, t.fechaCierre
+    ].map(v => `"${(v||'').replace(/"/g,'""')}"`).join(','));
+    const csv  = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href  = URL.createObjectURL(blob);
+    const hoy = new Date().toLocaleDateString('es-CL').replace(/\//g,'-');
+    link.download = `FlowCore_Pacifico_Mantenimiento_${periodoActual}_${hoy}.csv`;
+    link.click();
+  }
+
+  // ── Restaurar sesión al recargar ──
+  window.addEventListener('load', () => {
+    // Sincronizar todos los logos con el del login
+    setTimeout(() => {
+      const loginLogo = document.querySelector('#login-screen img');
+      if (loginLogo) {
+        document.querySelectorAll('.topbar img, #stats-logo').forEach(img => {
+          img.src = loginLogo.src;
+        });
+      }
+    }, 100);
+    const sesion = sessionStorage.getItem('sek_sesion');
+    if (sesion) {
+      usuarioActual = JSON.parse(sesion);
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('panel-screen').style.display = 'flex';
+      if (usuarioActual.rol === 'admin') {
+        document.getElementById('btn-stats-panel').style.display  = 'block';
+        document.getElementById('btn-admin-panel').style.display  = 'block';
+        document.getElementById('btn-encargados-panel').style.display = 'block';
+      } else if (usuarioActual.rol === 'supervisor') {
+        document.getElementById('btn-stats-panel').style.display  = 'block';
+        document.getElementById('btn-encargados-panel').style.display = 'block';
+      }
+      if (false) {
+      }
+      if (usuarioActual.rol === 'admin') {
+        document.getElementById('topbar-username').textContent = 'Administrador';
+        document.getElementById('topbar-rol').textContent = 'ADMINISTRADOR — FLOWCORE';
+      } else {
+        document.getElementById('topbar-username').textContent = usuarioActual.nombre || usuarioActual.usuario;
+        document.getElementById('topbar-rol').textContent = getRolLabel(usuarioActual.rol).toUpperCase() + ' — FLOWCORE';
+      }
+      cargarUsuarios();
+      cargarEncargados();
+      // Restaurar pantalla activa después de cargar tickets
+      cargarTickets().then(() => {
+        const pantalla = sessionStorage.getItem('sek_pantalla') || 'panel';
+        if (pantalla === 'stats') {
+          document.getElementById('panel-screen').style.display = 'none';
+          document.getElementById('stats-screen').style.display = 'flex';
+          calcularStats();
+        } else if (pantalla === 'admin') {
+          document.getElementById('panel-screen').style.display = 'none';
+          document.getElementById('admin-screen').style.display = 'flex';
+        } else if (pantalla === 'encargados') {
+          document.getElementById('panel-screen').style.display = 'none';
+          document.getElementById('encargados-screen').style.display = 'flex';
+        } else {
+          document.getElementById('panel-screen').style.display = 'flex';
+        }
+      });
+    }
+  });
+
+  // Cerrar modal con Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { cerrarModal(); cerrarModalEdit(); }
+  });
+</script>
+
+<!-- ══ ADMIN SCREEN ══ -->
+<div id="admin-screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <img src="data:image/jpeg;base64,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" alt="FlowCore" style="height:36px;object-fit:contain;background:#fff;border-radius:4px;padding:3px 6px;flex-shrink:0;">
+      <div>
+        <div class="topbar-title">Gestión de Usuarios</div>
+        <div class="topbar-sub">FLOWCORE – SOLO ADMINISTRADOR</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-logout" onclick="volverPanel()">← Volver al panel</button>
+      <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <div class="admin-title">Gestión de Usuarios</div>
+    <div class="admin-sub">El administrador y supervisor pueden crear, editar o eliminar usuarios.</div>
+
+    <!-- Lista de usuarios -->
+    <div class="users-card">
+      <div class="users-card-header">
+        <span>Usuarios del sistema</span>
+        <button class="btn-add-user" onclick="toggleFormNuevoUsuario()">+ Nuevo usuario</button>
+      </div>
+      <div id="lista-usuarios"></div>
+      <!-- Formulario nuevo usuario -->
+      <div class="new-user-form" id="form-nuevo-usuario">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Nombre</label>
+            <input type="text" id="nu-nombre" placeholder="Ej: Juan Pérez">
+          </div>
+          <div class="form-field">
+            <label>Usuario</label>
+            <input type="text" id="nu-usuario" placeholder="Ej: jperez">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Contraseña</label>
+            <div style="position:relative;">
+              <input type="password" id="nu-pass" placeholder="Mínimo 6 caracteres" style="width:100%;border:1.5px solid var(--light);border-radius:7px;padding:9px 40px 9px 12px;font-family:&#39;DM Sans&#39;,sans-serif;font-size:0.88rem;color:var(--navy);background:var(--white);outline:none;">
+              <button type="button" onclick="toggleVer(&#39;nu-pass&#39;,this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray);font-size:1rem;">👁</button>
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Rol</label>
+            <select id="nu-rol">
+              <option value="supervisor">Supervisor</option>
+              <option value="direccion">Dirección</option>
+              <option value="administracion">Administración</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-save-user" onclick="guardarNuevoUsuario()">Guardar usuario</button>
+        <button class="btn-cancel-user" onclick="toggleFormNuevoUsuario()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Cambiar mi contraseña -->
+    <div class="change-pass-card">
+      <div class="change-pass-header"><span>Cambiar mi contraseña</span></div>
+      <div class="change-pass-body">
+        <label class="pass-field-label">Contraseña actual</label>
+        <div class="pass-field-wrap">
+          <input type="password" id="cp-actual" placeholder="Tu contraseña actual">
+          <button type="button" class="toggle-pass-light" onclick="toggleVer(&#39;cp-actual&#39;,this)" tabindex="-1">👁</button>
+        </div>
+        <label class="pass-field-label">Nueva contraseña</label>
+        <div class="pass-field-wrap">
+          <input type="password" id="cp-nueva" placeholder="Mínimo 6 caracteres">
+          <button type="button" class="toggle-pass-light" onclick="toggleVer(&#39;cp-nueva&#39;,this)" tabindex="-1">👁</button>
+        </div>
+        <label class="pass-field-label">Repetir nueva contraseña</label>
+        <div class="pass-field-wrap">
+          <input type="password" id="cp-repetir" placeholder="Repite la nueva contraseña">
+          <button type="button" class="toggle-pass-light" onclick="toggleVer(&#39;cp-repetir&#39;,this)" tabindex="-1">👁</button>
+        </div>
+        <button class="btn-save-pass" onclick="cambiarClave()">Guardar nueva contraseña</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL EDITAR USUARIO ══ -->
+<div class="modal-edit-overlay" id="modal-edit">
+  <div class="modal-edit-box">
+    <div class="modal-edit-title">
+      <span>Editar usuario</span>
+      <button onclick="cerrarModalEdit()">✕</button>
+    </div>
+    <div class="edit-field">
+      <label>Nombre completo</label>
+      <div class="edit-field-wrap">
+        <input type="text" id="edit-nombre" placeholder="Nombre del usuario">
+      </div>
+    </div>
+    <div class="edit-field">
+      <label>Nombre de usuario</label>
+      <div class="edit-field-wrap">
+        <input type="text" id="edit-usuario" placeholder="Usuario para login">
+      </div>
+    </div>
+    <div class="edit-field">
+      <label>Nueva contraseña <span style="font-weight:400;color:var(--gray)">(dejar vacío para no cambiar)</span></label>
+      <div class="edit-field-wrap">
+        <input type="password" id="edit-pass" placeholder="Nueva contraseña">
+        <button type="button" class="toggle-pass-light" onclick="toggleVer(&#39;edit-pass&#39;,this)" tabindex="-1">👁</button>
+      </div>
+    </div>
+    <div class="edit-field">
+      <label>Rol</label>
+      <select id="edit-rol">
+        <option value="supervisor">Supervisor</option>
+        <option value="direccion">Dirección</option>
+        <option value="administracion">Administración</option>
+      </select>
+    </div>
+    <div class="modal-edit-btns">
+      <button class="btn-edit-cancel" onclick="cerrarModalEdit()">Cancelar</button>
+      <button class="btn-edit-save" onclick="guardarEdicionUsuario()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL ASIGNAR ENCARGADO ══ -->
+<div class="modal-asignar-overlay" id="modal-asignar">
+  <div class="modal-asignar-box">
+    <div class="modal-asignar-title">
+      <span>👤 Asignar Encargado</span>
+      <button onclick="cerrarModalAsignar()">✕</button>
+    </div>
+    <!-- Ticket info -->
+    <div style="background:var(--cream);border-radius:8px;padding:12px 16px;margin-bottom:18px;border-left:3px solid var(--gold);">
+      <div style="font-size:0.68rem;color:var(--gold);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;">Ticket</div>
+      <div style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:1.1rem;font-weight:700;color:var(--navy);" id="asignar-ticket-display">—</div>
+      <input type="hidden" id="asignar-ticket">
+    </div>
+    <div class="asignar-field">
+      <label>Seleccionar encargado</label>
+      <select id="asignar-select" onchange="rellenarCorreo()">
+        <option value="">-- Seleccionar de la lista --</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--gray);font-size:0.75rem;">
+      <div style="flex:1;height:1px;background:var(--light);"></div>
+      <span>o ingresar manualmente</span>
+      <div style="flex:1;height:1px;background:var(--light);"></div>
+    </div>
+    <div class="asignar-field">
+      <label>Nombre del encargado</label>
+      <input type="text" id="asignar-nombre" placeholder="Ej: Juan Pérez">
+    </div>
+    <div class="asignar-field">
+      <label>Correo electrónico</label>
+      <input type="email" id="asignar-correo" placeholder="correo@ejemplo.com">
+    </div>
+    <div class="modal-asignar-btns">
+      <button class="btn-asignar-cancel" onclick="cerrarModalAsignar()">Cancelar</button>
+      <button class="btn-asignar-save" onclick="confirmarAsignacion()">📧 Asignar y notificar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ ENCARGADOS SCREEN ══ -->
+<div id="encargados-screen" style="display:none;width:100%;min-height:100vh;background:#f0ece4;flex-direction:column;">
+  <div class="topbar">
+    <div class="topbar-left">
+      <img src="data:image/jpeg;base64,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" alt="FlowCore" id="enc-logo" style="height:36px;object-fit:contain;background:#fff;border-radius:4px;padding:3px 6px;flex-shrink:0;">
+      <div>
+        <div class="topbar-title">Gestión de Encargados</div>
+        <div class="topbar-sub">Sistema de Gestión de Mantenimiento</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-logout" onclick="volverDesdeEncargados()">← Volver</button>
+      <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <div class="admin-title">Encargados de Reparación</div>
+    <div class="admin-sub">Los supervisores y administradores pueden agregar o quitar encargados.</div>
+    <div class="users-card">
+      <div class="users-card-header">
+        <span>Lista de encargados</span>
+        <button class="btn-add-user" onclick="toggleFormNuevoEncargado()">+ Nuevo encargado</button>
+      </div>
+      <div id="lista-encargados"></div>
+      <div class="new-user-form" id="form-nuevo-encargado">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Nombre completo</label>
+            <input type="text" id="ne-nombre" placeholder="Nombre del encargado">
+          </div>
+          <div class="form-field">
+            <label>Correo electrónico</label>
+            <input type="email" id="ne-correo" placeholder="correo@ejemplo.com">
+          </div>
+        </div>
+        <button class="btn-save-user" onclick="guardarNuevoEncargado()">Guardar encargado</button>
+        <button class="btn-cancel-user" onclick="toggleFormNuevoEncargado()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL CAMBIAR ESTADO ══ -->
+<div class="modal-asignar-overlay" id="modal-estado">
+  <div class="modal-asignar-box">
+    <div class="modal-asignar-title">
+      <span>🔄 Resetear Ticket</span>
+      <button onclick="cerrarModalEstado()">✕</button>
+    </div>
+    <div style="background:var(--cream);border-radius:8px;padding:12px 16px;margin-bottom:20px;border-left:3px solid var(--gold);">
+      <div style="font-size:0.68rem;color:var(--gold);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;">Ticket</div>
+      <div style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:1.1rem;font-weight:700;color:var(--navy);" id="estado-ticket-display">—</div>
+    </div>
+    <p style="font-size:0.82rem;color:var(--gray);margin-bottom:14px;line-height:1.5;">
+      Al volver a <strong>Abierto</strong> se borrarán el encargado, comentario, fotos de reparación y fecha de cierre.
+    </p>
+    <button onclick="cambiarEstado(&#39;Abierto&#39;)" style="width:100%;padding:14px;background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;border-radius:8px;font-family:&#39;DM Sans&#39;,sans-serif;font-size:0.92rem;font-weight:700;cursor:pointer;text-align:left;">
+      ⚠️ Volver a Abierto — Resetear ticket
+    </button>
+    <div class="modal-asignar-btns" style="margin-top:16px;">
+      <button class="btn-asignar-cancel" onclick="cerrarModalEstado()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ STATS SCREEN ══ -->
+<div id="stats-screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <img src="data:image/jpeg;base64,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" alt="FlowCore" id="stats-logo" style="height:36px;object-fit:contain;background:#fff;border-radius:4px;padding:3px 6px;flex-shrink:0;">
+      <div>
+        <div class="topbar-title">Estadísticas &amp; KPIs</div>
+        <div class="topbar-sub">Sistema de Gestión de Mantenimiento</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-logout" onclick="volverDesdeStats()">← Volver</button>
+      <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="stats-body">
+    <div class="stats-section-title">INMEGA FlowCore</div>
+    <div class="stats-section-sub">Sistema de Gestión de Mantenimiento</div>
+
+    <!-- Filtro periodo -->
+    <div class="periodo-bar">
+      <span style="font-size:0.78rem;color:var(--gray);font-weight:600;">Ver:</span>
+      <button class="periodo-btn" onclick="cambiarPeriodo(&#39;semana&#39;, this)">Esta semana</button>
+      <button class="periodo-btn" onclick="cambiarPeriodo(&#39;mes&#39;, this)">Este mes</button>
+      <button class="periodo-btn" onclick="cambiarPeriodo(&#39;año&#39;, this)">Este año</button>
+      <button class="periodo-btn active" onclick="cambiarPeriodo(&#39;todo&#39;, this)">Todo</button>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-row">
+      <div class="kpi-card k-total">
+        <div class="kpi-num" id="kpi-total">0</div>
+        <div class="kpi-label">Total tickets</div>
+        <div class="kpi-sub" id="kpi-total-sub">en el período</div>
+      </div>
+      <div class="kpi-card k-open">
+        <div class="kpi-num" id="kpi-pendientes">0</div>
+        <div class="kpi-label">Sin resolver</div>
+        <div class="kpi-sub" id="kpi-pendientes-sub">abiertos + críticos</div>
+      </div>
+      <div class="kpi-card k-closed">
+        <div class="kpi-num" id="kpi-cerrados">0</div>
+        <div class="kpi-label">Resueltos</div>
+        <div class="kpi-sub" id="kpi-tasa">tasa: 0%</div>
+      </div>
+      <div class="kpi-card k-time">
+        <div class="kpi-num" id="kpi-tiempo">—</div>
+        <div class="kpi-label">Tiempo prom.</div>
+        <div class="kpi-sub">días en resolver</div>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Tickets por estado</div>
+        <div id="chart-estados-svg" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;min-height:200px;justify-content:center;">
+          <svg id="dona-svg" width="160" height="160" viewBox="0 0 160 160"></svg>
+          <div id="dona-leyenda" style="display:flex;flex-direction:column;gap:8px;font-size:0.8rem;"></div>
+        </div>
+      </div>
+      <div class="chart-card" style="overflow:auto;max-height:320px;">
+        <div class="chart-title">⏱ Tiempo de resolución (mayor a menor)</div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.78rem;" id="tabla-tiempos">
+          <thead style="position:sticky;top:0;background:#fff;">
+            <tr>
+              <th style="padding:8px 10px;text-align:left;color:var(--gray);border-bottom:1px solid var(--light);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.05em;">Ticket</th>
+              <th style="padding:8px 10px;text-align:left;color:var(--gray);border-bottom:1px solid var(--light);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.05em;">Ubicación</th>
+              <th style="padding:8px 10px;text-align:left;color:var(--gray);border-bottom:1px solid var(--light);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.05em;">Encargado</th>
+              <th style="padding:8px 10px;text-align:center;color:var(--gray);border-bottom:1px solid var(--light);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.05em;">Días</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-tiempos"></tbody>
+        </table>
+        <div id="no-tiempos" style="display:none;text-align:center;padding:24px;color:var(--gray);font-size:0.8rem;">No hay tickets cerrados en este período.</div>
+      </div>
+    </div>
+    <!-- Gráfico semanal SVG -->
+    <div class="chart-card" style="margin-bottom:24px;">
+      <div class="chart-title">📅 Anomalías por semana</div>
+      <div style="overflow-x:auto;">
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+          <svg id="bar-semanal-svg" width="100%" height="190" viewBox="0 0 600 190" style="min-width:300px;"></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla resumen -->
+    <div class="resumen-card">
+      <div class="resumen-header">
+        <span>Resumen de tickets <span id="sel-count" style="color:var(--gold-lt);margin-left:8px;"></span></span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-export" onclick="generarInforme()" id="btn-informe" style="background:#fff;color:var(--navy);display:none;">📄 Generar Informe</button>
+          <button class="btn-export" onclick="exportarCSV()">⬇ CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="resumen-table">
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox" id="sel-all" onclick="seleccionarTodos(this)"></th>
+              <th>Ticket</th>
+              <th>Fecha</th>
+              <th>Ubicación</th>
+              <th>Estado</th>
+              <th>Encargado</th>
+              <th>Fecha Cierre</th>
+              <th>Días</th>
+            </tr>
+          </thead>
+          <tbody id="resumen-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal informe -->
+    <div id="modal-informe" style="display:none;position:fixed;inset:0;background:rgba(15,22,36,0.8);z-index:9999;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:14px;padding:32px;max-width:700px;width:92%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.4);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <div style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:1.4rem;font-weight:700;color:var(--navy);">📄 Informe de Mantenimiento</div>
+          <button onclick="cerrarInforme()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--gray);">✕</button>
+        </div>
+        <div id="informe-content" style="font-size:0.88rem;line-height:1.7;color:#333;white-space:pre-wrap;min-height:200px;"></div>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+          <button onclick="cerrarInforme()" style="padding:10px 20px;border:1.5px solid var(--light);background:none;color:var(--gray);border-radius:8px;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;">Cerrar</button>
+          <button onclick="copiarInforme()" style="padding:10px 20px;background:var(--navy);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;font-weight:600;">📋 Copiar</button>
+          <button onclick="descargarWord()" id="btn-word" style="padding:10px 20px;background:#1d6f42;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;font-weight:600;">📄 Descargar Word</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- docx library for Word export -->
+<script src="file:///C:/Users/crist/Downloads/index_files/index.js.descarga"></script>
+
+
+
+</body></html>
